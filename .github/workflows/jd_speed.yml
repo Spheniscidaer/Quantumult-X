@@ -10,7 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: HakimWoo/Quantumult-X/Scripts/JD
+          repository: HakimWoo/Quantumult-X
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -27,7 +27,7 @@ jobs:
           npm install
       - name: '运行 【天天加速】'
         run: |
-          node jd_speed.js
+          node Scripts/JD/jd_speed.js
         env:
           JD_COOKIE: ${{ secrets.JD_COOKIE }}
           JD_DEBUG: ${{ secrets.JD_DEBUG }}

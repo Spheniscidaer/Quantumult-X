@@ -1,8 +1,8 @@
-name: jd_joy_feedPets
+name: jd_daily_egg
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/20 * * * *'
+    - cron: '15 */3 * * *'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,13 +25,12 @@ jobs:
       - name: npm install
         run: |
           npm install
-      - name: '运行 【宠汪汪喂食脚本】'
+      - name: '运行 【天天提鹅】'
         run: |
-          node jd_joy_feedPets.js
+          node jd_daily_egg.js
         env:
           JD_COOKIE: ${{ secrets.JD_COOKIE }}
           JD_DEBUG: ${{ secrets.JD_DEBUG }}
-          JOY_FEED_COUNT: ${{ secrets.JOY_FEED_COUNT }}
           PUSH_KEY: ${{ secrets.PUSH_KEY }}
           BARK_PUSH: ${{ secrets.BARK_PUSH }}
           BARK_SOUND: ${{ secrets.BARK_SOUND }}
@@ -40,3 +39,4 @@ jobs:
           DD_BOT_TOKEN: ${{ secrets.DD_BOT_TOKEN }}
           DD_BOT_SECRET: ${{ secrets.DD_BOT_SECRET }}
           IGOT_PUSH_KEY: ${{ secrets.IGOT_PUSH_KEY }}
+          JD_818_SHAREID_NOTIFY: ${{ secrets.JD_818_SHAREID_NOTIFY }}

@@ -2,7 +2,7 @@ name: jd_factory
 on:
   workflow_dispatch:
   schedule:
-    - cron: '20 */2 * * *'
+    - cron: '20 */3 * * *'
 jobs:
   build:
     runs-on: ubuntu-latest

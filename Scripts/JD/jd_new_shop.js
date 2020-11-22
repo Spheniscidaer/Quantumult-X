@@ -13,15 +13,36 @@ const $ = new Env('新店福利');
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let cookiesArr = [],
     cookie = '',
-    shareCode = ['P04z54XCjVXmIaW5m9cZ2esjHVDlzxvdLVQQM0', 'P04z54XCjVXmIaW5m9cZ2aujioYkmbOWXxVrt4'];
+    sharecodes = [
+        'P04z54XCjVXmIaW5m9cZ2esjHVDlzxvdLVQQM0', //账号 1
+        'P04z54XCjVXmIaW5m9cZ2esjHVDlzxvdLVQQM0', //账号 2
+    ];
 if ($.isNode()) {
     Object.keys(jdCookieNode).forEach((item) => {
         cookiesArr.push(jdCookieNode[item])
-    })
+    });
+
+    // github actions 用户的好友互助码 Secret 变量: NEWSHOP_SHARECODES (格式参考农村、萌宠)
+    const $ENV_SHARECODES = process.env.NEWSHOP_SHARECODES;
+    if ($ENV_SHARECODES) {
+        $ENV_SHARECODES.trim()
+            .split(/([\n\r]|\\n|\\r)+|&/) //用 & 代替换行分隔多账号，可留空。
+            .map(str => (str || '').trim())
+            .forEach((str, i) => {
+                if (!sharecodes[i])
+                    sharecodes[i] = '';
+                sharecodes[i] = str + '@' + sharecodes[i];
+            });
+    }
 } else {
     cookiesArr.push($.getdata('CookieJD'));
     cookiesArr.push($.getdata('CookieJD2'));
 }
+
+sharecodes = sharecodes.map(str => {
+    return [...new Set(str.trim().split('@').filter(Boolean))];
+});
+
 let message = '',
     UserName = '',
     subTitle = '',
@@ -141,6 +162,7 @@ async function meet() {
 
 // 互助
 async function share() {
+    const shareCode = sharecodes[$.index - 1];
     for (i = 0; i < shareCode.length; i++) {
         if (shareCode[i] === $.homeData.data.result.taskVos[0].assistTaskDetailVo.taskToken) {
             console.log('跳过自己的助力码');

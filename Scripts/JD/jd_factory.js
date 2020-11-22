@@ -10,15 +10,36 @@ const $ = new Env('东东工厂');
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let cookiesArr = [],
     cookie = '',
-    sharecode = ['P04z54XCjVWnYaS5m9cZ2esjHVDlwcfuXNvEN4'];
+    sharecodes = [
+        'P04z54XCjVWnYaS5m9cZ2esjHVDlwcfuXNvEN4', //账号 1
+        'P04z54XCjVWnYaS5m9cZ2esjHVDlwcfuXNvEN4', //账号 2
+    ];
 if ($.isNode()) {
     Object.keys(jdCookieNode).forEach((item) => {
         cookiesArr.push(jdCookieNode[item])
-    })
+    });
+
+    // github actions 用户的好友互助码 Secret 变量: FACTORY_SHARECODES (格式参考农村、萌宠)
+    const $ENV_SHARECODES = process.env.FACTORY_SHARECODES;
+    if ($ENV_SHARECODES) {
+        $ENV_SHARECODES.trim()
+            .split(/([\n\r]|\\n|\\r)+|&/) //用 & 代替换行分隔多账号，可留空。
+            .map(str => (str || '').trim())
+            .forEach((str, i) => {
+                if (!sharecodes[i])
+                    sharecodes[i] = '';
+                sharecodes[i] = str + '@' + sharecodes[i];
+            });
+    }
 } else {
     cookiesArr.push($.getdata('CookieJD'));
     cookiesArr.push($.getdata('CookieJD2'));
 }
+
+sharecodes = sharecodes.map(str => {
+    return [...new Set(str.trim().split('@').filter(Boolean))];
+});
+
 let message = '',
     subTitle = '',
     UserName = '',
@@ -158,8 +179,12 @@ async function meetList() {
         console.log('任务已经做过了');
     } else {
         for (i = 0; i < $.homeData.data.result.taskVos[3].maxTimes; i++) {
-            await meetForFactory(i);
             await jdfactory_getTaskDetail();
+            if ($.homeData.data.result.taskVos[3].times === $.homeData.data.result.taskVos[3].maxTimes) {
+                console.log('任务已经做完');
+                break;
+            }
+            await meetForFactory(i);
             console.log($.homeData.data.result.taskVos[3].shoppingActivityVos[i].title + '  ' + $.homeData.data.result.taskVos[3].times + '/' + $.homeData.data.result.taskVos[3].maxTimes);
             if ($.meetResult.data.bizMsg === "0") {
                 console.log(`任务执行成功获得${$.meetResult.result.score}⚡电量`)
@@ -198,8 +223,12 @@ async function followList() {
         console.log('任务已经做过了');
     } else {
         for (i = 0; i < $.homeData.data.result.taskVos[5].maxTimes; i++) {
-            await followShop(i);
             await jdfactory_getTaskDetail();
+            if ($.homeData.data.result.taskVos[5].times === $.homeData.data.result.taskVos[5].maxTimes) {
+                console.log('任务已经做完');
+                break;
+            }
+            await followShop(i);
             console.log('任务次数: ' + $.homeData.data.result.taskVos[5].times + '/' + $.homeData.data.result.taskVos[5].maxTimes);
             if ($.finishfollow.data.bizMsg === "0") {
                 console.log(`任务执行成功获得${$.finishfollow.data.result.score}⚡电量`);
@@ -213,13 +242,17 @@ async function followList() {
 
 // 互助
 async function share() {
+    const sharecode = sharecodes[$.index - 1];
     for (i = 0; i < sharecode.length; i++) {
+        const taskToken = sharecode[i];
+        if (taskToken === $.homeData.data.result.taskVos[1].assistTaskDetailVo.taskToken) {
+            console.log('跳过自己的助力码');
+            continue;
+        }
         console.log('开始助力第' + (i + 1) + '个好友');
         const functionId = 'jdfactory_collectScore';
-        const taskToken = sharecode[i];
         const body = `'taskToken':'${taskToken}'`;
-        const host = `api.m.jd.com`;
-        $.shareInfo = await request(functionId, body, host);
+        $.shareInfo = await request(functionId, body);
         console.log($.shareInfo.data.bizMsg);
     }
 }
@@ -229,8 +262,7 @@ async function signForFactory() {
     const functionId = 'jdfactory_collectScore';
     const taskToken = $.homeData.data.result.taskVos[0].simpleRecordInfoVo.taskToken;
     const body = `'taskToken':'${taskToken}'`;
-    const host = `api.m.jd.com`;
-    $.signResult = await request(functionId, body, host, 'application/x-www-form-urlencoded');
+    $.signResult = await request(functionId, body);
 }
 
 // 逛一逛API
@@ -238,8 +270,7 @@ async function meetForFactory(i) {
     const functionId = 'jdfactory_collectScore';
     const taskToken = $.homeData.data.result.taskVos[3].shoppingActivityVos[i].taskToken;
     const body = `'taskToken':'${taskToken}'`;
-    const host = `api.m.jd.com`;
-    $.meetResult = await request(functionId, body, host);
+    $.meetResult = await request(functionId, body);
 }
 
 // 逛商品API
@@ -247,17 +278,15 @@ async function shopForFactory(i) {
     const functionId = 'jdfactory_collectScore';
     const taskToken = $.homeData.data.result.taskVos[4].productInfoVos[i].taskToken;
     const body = `'taskToken':'${taskToken}'`;
-    const host = `api.m.jd.com`;
-    $.shopResult = await request(functionId, body, host);
+    $.shopResult = await request(functionId, body);
 }
 
 //关注店铺api
 async function followShop(i) {
     const functionId = 'followShop';
     const shopId = $.homeData.data.result.taskVos[5].followShopVo[i].shopId;
-    const host = `api.m.jd.com`;
     const body = `"follow":"true",'shopId':'${shopId}',"award":"false","sourceRpc":"shop_app_home_follow"`;
-    $.followShop = await request(functionId, body, host);
+    $.followShop = await request(functionId, body);
     await finishfollow(i);
 }
 
@@ -265,8 +294,7 @@ async function finishfollow() {
     const functionId = 'jdfactory_collectScore';
     const taskToken = $.homeData.data.result.taskVos[5].followShopVo[i].taskToken;
     const body = `'taskToken':'${taskToken}'`;
-    const host = `api.m.jd.com`;
-    $.finishfollow = await request(functionId, body, host);
+    $.finishfollow = await request(functionId, body);
 }
 
 // 充电
@@ -347,7 +375,7 @@ async function DailyElectricity() {
             const taskToken = $.homeData.data.result.taskVos[7].threeMealInfoVos.taskToken;
             const body = `'taskToken':'${taskToken}'`;
             const host = `api.m.jd.com`;
-            $.DailyElectricityResult = await request(functionId, body, host);
+            $.DailyElectricityResult = await request(functionId, body);
             if ($.DailyElectricityResult.data.bizCode === 0) {
                 console.log($.DailyElectricityResult.data.bizMsg);
             } else {
@@ -357,9 +385,9 @@ async function DailyElectricity() {
     }
 }
 
-function request(functionId, body, host, ContentType) {
+function request(functionId, body) {
     return new Promise(resolve => {
-        $.post(taskPostUrl(functionId, body, host, ContentType), (err, resp, data) => {
+        $.post(taskPostUrl(functionId, body), (err, resp, data) => {
             try {
                 if (err) {
                     console.log('\n京东工厂: API查询请求失败 ‼️‼️')
@@ -394,7 +422,7 @@ function taskUrl(function_id, body = {}) {
     }
 }
 
-function taskPostUrl(functionId, body, host, ContentType) {
+function taskPostUrl(functionId, body) {
     return {
         url: `${JD_API_HOST}?functionId=${functionId}`,
         headers: {
@@ -402,10 +430,10 @@ function taskPostUrl(functionId, body, host, ContentType) {
             'Cookie': cookie,
             'Connection': `keep-alive`,
             'Referer': `https://h5.m.jd.com/babelDiy/Zeus/2uSsV2wHEkySvompfjB43nuKkcHp/index.html`,
-            'Host': host,
+            'Host': 'api.m.jd.com',
             'Accept-Encoding': `gzip, deflate, br`,
             'Accept-Language': `zh-cn`,
-            'Content-Type': ContentType,
+            'Content-Type': 'application/x-www-form-urlencoded',
             'User-Agent': `jdapp;iPhone;9.2.0;14.1;`
         },
         body: `functionId=${functionId}&body={${body}}&client=wh5&clientVersion=1.0.0`
@@ -413,7 +441,7 @@ function taskPostUrl(functionId, body, host, ContentType) {
 }
 
 function sleep(s) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         setTimeout(() => {
             resolve();
         }, s);

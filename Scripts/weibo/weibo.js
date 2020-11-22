@@ -51,7 +51,8 @@ hostname = api.weibo.cn, pay.sc.weibo.com
 const $ = new Env('新浪微博')
 const notify = $.isNode() ? require('./sendNotify') : '';
 let tokenArr = [],
-    payArr = [];
+    payArr = [],
+    paybag;
 
 if (isGetCookie = typeof $request !== `undefined`) {
     GetCookie();
@@ -110,10 +111,7 @@ if ($.isNode()) {
             } else {
                 paybag = `【钱包签到】❌ 未获取Cooiekie`
             };
-            $.msg($.name, nickname, wbsign + paybag + docard)
-            if ($.isNode()) {
-                await notify.sendNotify($.name, nickname + '\n' + wbsign + paybag + docard)
-            }
+            await showmsg()
         }
     }
 })()
@@ -191,20 +189,28 @@ function paysign() {
             url: `https://pay.sc.weibo.com/aj/mobile/home/welfare/signin/do?_=${$.startTime+10}`,
             headers: JSON.parse(payheaderVal)
         }, (error, response, data) => {
-            try {
-                let result = JSON.parse(data)
-                if (result.status == 1) {
-                    paybag = `【微博钱包】 ✅ +` + result.score + ' 分\n'
-                } else if (result.code == 100000) {
-                    paybag = `【微博钱包】 🔁\n`
-                }
-            } catch (error) {
+            let result = JSON.parse(data)
+            if (result.status == 1) {
+                paybag = `【微博钱包】 ✅ +` + result.score + ' 分\n'
+            } else if (result.status == '2') {
+                paybag = `【微博钱包】 🔁\n`
+            } else {
                 paybag = `【钱包签到】❌ Cookie失效` + '\n'
             }
             resolve()
         })
     })
 }
+async function showmsg() {
+    if (paybag) {
+        $.msg($.name, nickname, wbsign + paybag + docard);
+        if ($.isNode()) {
+            await notify.sendNotify($.name, nickname + '\n' + wbsign + paybag + docard)
+        }
+    }
+}
+
+
 
 function Env(t, e) { class s { constructor(t) { this.env = t }
         send(t, e = "GET") { t = "string" == typeof t ? { url: t } : t; let s = this.get; return "POST" === e && (s = this.post), new Promise((e, i) => { s.call(this, t, (t, s, r) => { t ? i(t) : e(s) }) }) }

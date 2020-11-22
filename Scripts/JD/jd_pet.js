@@ -1,6 +1,6 @@
 /*
 东东萌宠 更新地址： https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_pet.js
-更新时间：2020-11-07
+更新时间：2020-11-21
 已支持IOS双京东账号,Node.js支持N个京东账号
 脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
 
@@ -26,8 +26,6 @@ cron "15 6-18/6 * * *" script-path=https://raw.githubusercontent.com/lxk0301/jd_
 const $ = new Env('东东萌宠');
 let cookiesArr = [],
     cookie = '',
-    jdPetShareArr = [],
-    isBox = false,
     notify, newShareCodes;
 //助力好友分享码(最多5个,否则后面的助力失败),原因:京东农场每人每天只有四次助力机会
 //此此内容是IOS用户下载脚本到本地使用，填写互助码的地方，同一京东账号的好友互助码请使用@符号隔开。
@@ -100,12 +98,20 @@ async function jdPet() {
         goodsUrl = $.petInfo.goodsInfo && $.petInfo.goodsInfo.goodsUrl;
         // option['media-url'] = goodsUrl;
         // console.log(`初始化萌宠信息完成: ${JSON.stringify(petInfo)}`);
-        if ($.petInfo.petStatus === 5 && $.petInfo.showHongBaoExchangePop) {
+        if ($.petInfo.petStatus === 5) {
             await slaveHelp(); //可以兑换而没有去兑换,也能继续助力好友
             option['open-url'] = "openApp.jdMobile://";
             $.msg($.name, `【提醒⏰】${$.petInfo.goodsInfo.goodsName}已可领取`, '请去京东APP或微信小程序查看', option);
             if ($.isNode()) {
                 await notify.sendNotify(`${$.name} - 账号${$.index} - ${$.nickName || $.UserName}奖品已可领取`, `京东账号${$.index} ${$.nickName}\n${$.petInfo.goodsInfo.goodsName}已可领取`);
+            }
+            return
+        } else if ($.petInfo.petStatus === 6) {
+            await slaveHelp(); //已领取红包,但未领养新的,也能继续助力好友
+            option['open-url'] = "openApp.jdMobile://";
+            $.msg($.name, `【提醒⏰】已领取红包,但未继续领养新的物品`, '请去京东APP或微信小程序继续领养', option);
+            if ($.isNode()) {
+                await notify.sendNotify(`${$.name} - 账号${$.index} - ${$.nickName || $.UserName}奖品已可领取`, `京东账号${$.index} ${$.nickName}\n已领取红包,但未继续领养新的物品`);
             }
             return
         }
@@ -410,6 +416,7 @@ async function feedReachInitFun() {
     } while (needFeedTimes > 0 && tryTimes > 0)
     console.log('投食任务结束...\n');
 }
+
 async function showMsg() {
     let ctrTemp;
     if ($.isNode() && process.env.PET_NOTIFY_CONTROL) {
@@ -430,44 +437,11 @@ async function showMsg() {
     }
 }
 
-function readShareCode() {
-    return new Promise(resolve => {
-        $.get({ url: `http://api.turinglabs.net/api/v1/jd/pet/read/${randomCount}/` }, (err, resp, data) => {
-            try {
-                if (err) {
-                    console.log(`${JSON.stringify(err)}`)
-                    console.log(`${$.name} API请求失败，请检查网路重试`)
-                } else {
-                    if (data) {
-                        console.log(`随机取个${randomCount}码放到您固定的互助码后面`)
-                        data = JSON.parse(data);
-                    }
-                }
-            } catch (e) {
-                $.logErr(e, resp)
-            } finally {
-                resolve(data);
-            }
-        })
-    })
-}
-
 function shareCodesFormat() {
     return new Promise(async resolve => {
-        // console.log(`第${$.index}个京东账号的助力码:::${jdPetShareArr[$.index - 1]}`)
         newShareCodes = [];
-        if (jdPetShareArr[$.index - 1]) {
-            newShareCodes = jdPetShareArr[$.index - 1].split('@');
-        } else {
-            console.log(`由于您第${$.index}个京东账号未提供shareCode,将采纳本脚本自带的助力码\n`)
-            const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
-            newShareCodes = shareCodes[tempIndex].split('@');
-        }
-        const readShareCodeRes = await readShareCode();
-        if (readShareCodeRes && readShareCodeRes.code === 200) {
-            newShareCodes = [...new Set([...newShareCodes, ...(readShareCodeRes.data || [])])];
-        }
-        console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify(newShareCodes)}`)
+        const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
+        newShareCodes = shareCodes[tempIndex].split('@');
         resolve();
     })
 }
@@ -497,40 +471,7 @@ function requireConfig() {
                     jdPetShareArr.push(jdPetShareCodes[item])
                 }
             })
-        } else {
-            const boxShareCodeArr = ['jd_pet1', 'jd_pet2', 'jd_pet3', 'jd_pet4', 'jd_pet5'];
-            const boxShareCodeArr2 = ['jd2_pet1', 'jd2_pet2', 'jd2_pet3', 'jd2_pet4', 'jd2_pet5'];
-            const isBox1 = boxShareCodeArr.some((item) => {
-                const boxShareCode = $.getdata(item);
-                return (boxShareCode !== undefined && boxShareCode !== null && boxShareCode !== '');
-            });
-            const isBox2 = boxShareCodeArr2.some((item) => {
-                const boxShareCode = $.getdata(item);
-                return (boxShareCode !== undefined && boxShareCode !== null && boxShareCode !== '');
-            });
-            isBox = isBox1 ? isBox1 : isBox2;
-            if (isBox1) {
-                let temp = [];
-                for (const item of boxShareCodeArr) {
-                    if ($.getdata(item)) {
-                        temp.push($.getdata(item))
-                    }
-                }
-                jdPetShareArr.push(temp.join('@'));
-            }
-            if (isBox2) {
-                let temp = [];
-                for (const item of boxShareCodeArr2) {
-                    if ($.getdata(item)) {
-                        temp.push($.getdata(item))
-                    }
-                }
-                jdPetShareArr.push(temp.join('@'));
-            }
         }
-        // console.log(`jdPetShareArr::${JSON.stringify(jdPetShareArr)}`)
-        // console.log(`jdPetShareArr账号长度::${jdPetShareArr.length}`)
-        console.log(`您提供了${jdPetShareArr.length}个账号的东东萌宠助力码\n`);
         resolve()
     })
 }

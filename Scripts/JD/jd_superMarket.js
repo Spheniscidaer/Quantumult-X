@@ -2,31 +2,29 @@
  * @Author: lxk0301 https://github.com/lxk0301 
  * @Date: 2020-08-16 18:54:16
  * @Last Modified by: lxk0301
- * @Last Modified time: 2020-11-11 18:54:37
+ * @Last Modified time: 2020-11-22 08:22:37
  */
 /*
-京小超(活动入口：京东APP-》首页-》京东超市-》底部东东超市)
-现有功能：每日签到，日常任务（分享游戏，逛会场，关注店铺，卖货能手），收取金币，收取蓝币,商圈活动
+东东超市(活动入口：京东APP-》首页-》京东超市-》底部东东超市)
 Some Functions Modified From https://github.com/Zero-S1/JD_tools/blob/master/JD_superMarket.py
 支持京东双账号
 京小超兑换奖品请使用此脚本 https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_blueCoin.js
 脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
 // QuantumultX
 [task_local]
-#京小超
-11 1-23/5 * * * https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_superMarket.js, tag=京小超, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jxc.png, enabled=true
+#东东超市
+11 1-23/5 * * * https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_superMarket.js, tag=东东超市, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jxc.png, enabled=true
 // Loon
 [Script]
-cron "11 1-23/5 * * *" script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_superMarket.js,tag=京小超
+cron "11 1-23/5 * * *" script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_superMarket.js,tag=东东超市
 // Surge
-京小超 = type=cron,cronexp="11 1-23/5 * * *",wake-system=1,timeout=320,script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_superMarket.js
+东东超市 = type=cron,cronexp="11 1-23/5 * * *",wake-system=1,timeout=320,script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_superMarket.js
  */
-const $ = new Env('京小超');
+const $ = new Env('东东超市');
 //Node.js用户请在jdCookie.js处填写京东ck;
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [],
     cookie = '',
-    jdSuperMarketShareArr = [],
     notify, newShareCodes;
 
 let jdNotify = true; //用来是否关闭弹窗通知，true表示关闭，false表示开启。
@@ -42,9 +40,9 @@ const JD_API_HOST = 'https://api.m.jd.com/api';
 //下面给出两个账号的填写示例（iOS只支持2个京东账号）
 let shareCodes = [ // IOS本地脚本用户这个列表填入你要助力的好友的shareCode
     //账号一的好友shareCode,不同好友的shareCode中间用@符号隔开
-    '-4msulYas0O2JsRhE-2TA5XZmBQ@eU9Yar_mb_9z92_WmXNG0w@eU9YaejjYv4g8T2EwnsVhQ',
+    '',
     //账号二的好友shareCode,不同好友的shareCode中间用@符号隔开
-    'aURoM7PtY_Q@eU9Ya-y2N_5z9DvXwyIV0A@eU9YaOnjYK4j-GvWmXIWhA',
+    '',
 ]
 
 !(async() => {
@@ -118,8 +116,8 @@ function showMsg() {
 async function drawLottery() {
     console.log(`\n注意⚠:京小超抽奖已改版,花费500蓝币抽奖一次,现在脚本默认已关闭抽奖功能\n`);
     drawLotteryFlag = $.getdata('jdSuperMarketLottery') ? $.getdata('jdSuperMarketLottery') : drawLotteryFlag;
-    if ($.isNode() && process.env.jdSuperMarketLottery) {
-        drawLotteryFlag = process.env.jdSuperMarketLottery;
+    if ($.isNode() && process.env.SUPERMARKET_LOTTERY) {
+        drawLotteryFlag = process.env.SUPERMARKET_LOTTERY;
     }
     if (`${drawLotteryFlag}` === 'true') {
         const smtg_lotteryIndexRes = await smtg_lotteryIndex();
@@ -316,18 +314,13 @@ async function businessCircleActivity() {
   const smtg_getTeamPkDetailInfoRes = await smtg_getTeamPkDetailInfo();
   if (smtg_getTeamPkDetailInfoRes && smtg_getTeamPkDetailInfoRes.data.bizCode === 0) {
     const { joinStatus, pkStatus, inviteCount, inviteCode, currentUserPkInfo, pkUserPkInfo, prizeInfo, pkActivityId, teamId } = smtg_getTeamPkDetailInfoRes.data.result;
-    console.log(`joinStatus:${joinStatus}`);
-    console.log(`pkStatus:${pkStatus}`);
-    console.log(`inviteCode: [${inviteCode}]`);
-    console.log(`PK队伍teamId: [${teamId}]`);
-    console.log(`PK队伍名称: [${currentUserPkInfo && currentUserPkInfo.teamName}]`);
-    await updatePkActivityId();
-    if (!$.updatePkActivityIdRes) await updatePkActivityIdCDN();
-    console.log(`\nupdatePkActivityId[pkActivityId]:::${$.updatePkActivityIdRes.pkActivityId}`);
-    console.log(`\n京东服务器返回的[pkActivityId] ${pkActivityId}`);
+    console.log(`\njoinStatus:${joinStatus}`);
+    console.log(`pkStatus:${pkStatus}\n`);
     if (joinStatus === 0) {
       await updatePkActivityId();
       if (!$.updatePkActivityIdRes) await updatePkActivityIdCDN();
+      console.log(`\nupdatePkActivityId[pkActivityId]:::${$.updatePkActivityIdRes.pkActivityId}`);
+      console.log(`\n京东服务器返回的[pkActivityId] ${pkActivityId}`);
       if ($.updatePkActivityIdRes && ($.updatePkActivityIdRes.pkActivityId === pkActivityId)) {
         let Teams = [
           {
@@ -370,12 +363,17 @@ async function businessCircleActivity() {
         console.log('\nupdatePkActivityId请求返回的pkActivityId与京东服务器返回不一致,暂时不加入战队')
       }
     } else if (joinStatus === 1) {
-      console.log(`我邀请的人数:${inviteCount}\n`)
-      console.log(`\n我方战队战队 [${currentUserPkInfo.teamName}]/【${currentUserPkInfo.teamCount}】`);
-      console.log(`对方战队战队 [${pkUserPkInfo.teamName}]/【${pkUserPkInfo.teamCount}】\n`);
+      if (teamId) {
+        console.log(`inviteCode: [${inviteCode}]`);
+        console.log(`PK队伍teamId: [${teamId}]`);
+        console.log(`PK队伍名称: [${currentUserPkInfo && currentUserPkInfo.teamName}]`);
+        console.log(`我邀请的人数:${inviteCount}\n`)
+        console.log(`\n我方战队战队 [${currentUserPkInfo && currentUserPkInfo.teamName}]/【${currentUserPkInfo && currentUserPkInfo.teamCount}】`);
+        console.log(`对方战队战队 [${pkUserPkInfo && pkUserPkInfo.teamName}]/【${pkUserPkInfo && pkUserPkInfo.teamCount}】\n`);
+      }
     }
     if (pkStatus === 1) {
-      console.log(`商圈PK进行中`)
+      console.log(`商圈PK进行中\n`)
     } else if (pkStatus === 2) {
       console.log(`商圈PK结束了`)
       if (prizeInfo.pkPrizeStatus === 2) {
@@ -396,10 +394,10 @@ async function businessCircleActivity() {
           }
         }
       } else if (prizeInfo.pkPrizeStatus === 1) {
-        console.log(`商圈PK奖励已经领取`)
+        console.log(`商圈PK奖励已经领取\n`)
       }
     } else if (pkStatus === 3) {
-      console.log(`商圈PK暂停中`)
+      console.log(`商圈PK暂停中\n`)
     }
   }
   return
@@ -650,11 +648,8 @@ async function manageProduct() {
             productList2.push(item1);
           }
         }
-        // console.log(`productNow${JSON.stringify(productNow)}`)
-        // console.log(`productList2${JSON.stringify(productList2)}`)
         if (productList2 && productList2.length > 0) {
           productList2.sort(sortTotalPriceGold);
-          // console.log(productList2)
           if (productNow && productNow.length > 0) {
             if (productList2.slice(-1)[0]['productId'] === productNow[0]['productId']) {
               console.log(`货架[${item.shelfId}]${productNow[0]['name']}已上架\n`)
@@ -1344,21 +1339,7 @@ function sortSyData(a, b) {
 function sortTotalPriceGold(a, b) {
   return a['previewTotalPriceGold'] - b['previewTotalPriceGold']
 }
-//格式化助力码
-function shareCodesFormat() {
-  return new Promise(resolve => {
-    console.log(`第${$.index}个京东账号的助力码:::${jdSuperMarketShareArr[$.index - 1]}`)
-    if (jdSuperMarketShareArr[$.index - 1]) {
-      newShareCodes = jdSuperMarketShareArr[$.index - 1].split('@');
-    } else {
-      console.log(`由于您未提供与京京东账号相对应的shareCode,下面助力将采纳本脚本自带的助力码\n`)
-      const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
-      newShareCodes = shareCodes[tempIndex].split('@');
-    }
-    console.log(`格式化后第${$.index}个京东账号的助力码${JSON.stringify(newShareCodes)}`)
-    resolve();
-  })
-}
+
 function requireConfig() {
   return new Promise(resolve => {
     // console.log('\n开始获取京小超配置文件\n')
@@ -1378,8 +1359,6 @@ function requireConfig() {
     }
     console.log(`共${cookiesArr.length}个京东账号\n`);
     console.log(`京小超已改版,目前暂不用助力, 故无助力码`)
-    // console.log(`\n京小超商圈助力码::${JSON.stringify(jdSuperMarketShareArr)}`);
-    // console.log(`您提供了${jdSuperMarketShareArr.length}个账号的助力码\n`);
     resolve()
   })
 }

@@ -1,19 +1,20 @@
-const cookieName = '威锋网'
-const cookieKey = 'chavy_cookie_feng'
+const cookieName = '美团'
+const tokenurlKey = 'chavy_tokenurl_meituan'
+const tokenheaderKey = 'chavy_tokenheader_meituan'
+const signurlKey = 'chavy_signurl_meituan'
+const signheaderKey = 'chavy_signheader_meituan'
+const signbodyKey = 'chavy_signbody_meituan'
 const chavy = init()
-const cookieVal = $request.headers['Cookie']
-if (cookieVal.indexOf('userInfo') >= 0) {
-    if (cookieVal) {
-        if (chavy.setdata(cookieVal, cookieKey)) {
-            chavy.msg(`${cookieName}`, '获取Cookie: 成功', '')
-            chavy.log(`[${cookieName}] 获取Cookie: 成功, cookie: ${cookieVal}`)
-        }
-    }
-} else {
-    let subTitle = '获取Cookie: 失败'
-    let detail = `请确保在已登录状态下获取Cookie`
-    chavy.msg(`${cookieName}`, subTitle, detail)
-    chavy.log(`[${cookieName}] ${subTitle}, cookie: ${cookieVal}`)
+
+const requrl = $request.url
+if ($request && $request.method != 'OPTIONS' && requrl.match(/\/evolve\/signin\/signpost\//)) {
+    const signurlVal = requrl
+    const signheaderVal = JSON.stringify($request.headers)
+    const signbodyVal = $request.body
+    if (signurlVal) chavy.setdata(signurlVal, signurlKey)
+    if (signheaderVal) chavy.setdata(signheaderVal, signheaderKey)
+    if (signbodyVal) chavy.setdata(signbodyVal, signbodyKey)
+    chavy.msg(cookieName, `获取Cookie: 成功`, ``)
 }
 
 function init() {

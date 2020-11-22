@@ -11,16 +11,15 @@ cookie获取
 @chavy
 感谢两位大佬
 
-
-
 */
-const cookieName ='携程旅行'
+const cookieName = '携程旅行'
 const cookieKey = 'cookie_ctrip'
 const chen = init()
 let cookieVal = chen.getdata(cookieKey)
 sign()
+
 function sign() {
-    let url = {url: 'https://m.ctrip.com/restapi/soa2/14946/json/saveDailyBonus?',headers: { Cookie:cookieVal}}
+    let url = { url: 'https://m.ctrip.com/restapi/soa2/14946/json/saveDailyBonus?', headers: { Cookie: cookieVal } }
     url.headers['Origin'] = 'https://m.ctrip.com'
     url.headers['Connection'] = `keep-alive`
     url.headers['Content-Type'] = `application/json`
@@ -31,63 +30,62 @@ function sign() {
     url.headers['Accept-Encoding'] = `gzip, deflate, br`
     url.headers['https://m.ctrip.com/webapp/membercenter/task?isHideNavBar=YES&from_native_page=1']
     chen.get(url, (error, response, data) => {
-      const result = JSON.parse(data)
-      const title = `${cookieName}`
-      let subTitle = ``
-      let detail = ``
-    
-      if (result.resultcode == 0){
-        subTitle = `签到结果: 成功,总积分${result.integrated}`
-      } else {
-        subTitle = `签到结果: 未知`
-        detail = `说明: ${result.resultmessage}`
-      }
-      chen.msg(title, subTitle, detail)
+        const result = JSON.parse(data)
+        const title = `${cookieName}`
+        let subTitle = ``
+        let detail = ``
+
+        if (result.resultcode == 0) {
+            subTitle = `签到结果: 成功,总积分${result.integrated}`
+        } else {
+            subTitle = `签到结果: 未知`
+            detail = `说明: ${result.resultmessage}`
+        }
+        chen.msg(title, subTitle, detail)
     })
     chen.done()
-    }
+}
 
-  function init() {
+function init() {
     isSurge = () => {
-      return undefined === this.$httpClient ? false : true
+        return undefined === this.$httpClient ? false : true
     }
     isQuanX = () => {
-      return undefined === this.$task ? false : true
+        return undefined === this.$task ? false : true
     }
     getdata = (key) => {
-      if (isSurge()) return $persistentStore.read(key)
-      if (isQuanX()) return $prefs.valueForKey(key)
+        if (isSurge()) return $persistentStore.read(key)
+        if (isQuanX()) return $prefs.valueForKey(key)
     }
     setdata = (key, val) => {
-      if (isSurge()) return $persistentStore.write(key, val)
-      if (isQuanX()) return $prefs.setValueForKey(key, val)
+        if (isSurge()) return $persistentStore.write(key, val)
+        if (isQuanX()) return $prefs.setValueForKey(key, val)
     }
     msg = (title, subtitle, body) => {
-      if (isSurge()) $notification.post(title, subtitle, body)
-      if (isQuanX()) $notify(title, subtitle, body)
+        if (isSurge()) $notification.post(title, subtitle, body)
+        if (isQuanX()) $notify(title, subtitle, body)
     }
     log = (message) => console.log(message)
     get = (url, cb) => {
-      if (isSurge()) {
-        $httpClient.get(url, cb)
-      }
-      if (isQuanX()) {
-        url.method = 'GET'
-        $task.fetch(url).then((resp) => cb(null, {}, resp.body))
-      }
+        if (isSurge()) {
+            $httpClient.get(url, cb)
+        }
+        if (isQuanX()) {
+            url.method = 'GET'
+            $task.fetch(url).then((resp) => cb(null, {}, resp.body))
+        }
     }
     post = (url, cb) => {
-      if (isSurge()) {
-        $httpClient.post(url, cb)
-      }
-      if (isQuanX()) {
-        url.method = 'POST'
-        $task.fetch(url).then((resp) => cb(null, {}, resp.body))
-      }
+        if (isSurge()) {
+            $httpClient.post(url, cb)
+        }
+        if (isQuanX()) {
+            url.method = 'POST'
+            $task.fetch(url).then((resp) => cb(null, {}, resp.body))
+        }
     }
     done = (value = {}) => {
-      $done(value)
+        $done(value)
     }
     return { isSurge, isQuanX, msg, log, getdata, setdata, get, post, done }
-  }
-  
+}

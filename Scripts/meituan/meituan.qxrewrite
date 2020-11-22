@@ -1,0 +1,3 @@
+^https:\/\/i.meituan.com\/evolve\/signin\/signpost\/ url script-request-body ./meituan/meituan.cookie.js
+
+hostname = i.meituan.com

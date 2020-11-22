@@ -1,0 +1,3 @@
+^https?:\/\/iface(\d)?\.iqiyi\.com\/ url script-request-header ./iqiyi/iQIYI.js
+
+hostname= ifac*.iqiyi.com

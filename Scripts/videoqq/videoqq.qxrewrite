@@ -1,0 +1,3 @@
+^https:\/\/access.video.qq.com\/user\/auth_refresh url script-request-header ./videoqq/videoqq.cookie.js
+
+hostname = *.video.qq.com

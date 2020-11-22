@@ -1,8 +1,6 @@
 /*
 bilibili fan drama open 1080P+
 
-From https://github.com/Sunert/Scripts/blob/master/Script/Bilibili/BiliHD.js
-
 QX:
 https:\/\/ap(p|i)\.bilibili\.com\/((pgc\/player\/api\/playurl)|(x\/v2\/account\/myinfo\?)|(x\/v2\/account/mine\?)) url script-response-body BiliHD.js
 

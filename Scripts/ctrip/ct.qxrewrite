@@ -4,4 +4,4 @@ https://socketio\.ctrip\.com/api url reject
 ^https:\/\/m\.ctrip\.com\/restapi\/soa2\/16575\/getUserInfo url script-request-body ./ctrip/ct_cookie.js
 https:\/\/m\.ctrip\.com\/restapi\/soa2\/14946\/json\/userBaseInfo url script-request-header ./ctrip/ctrip_cookie.js
 
-host= m.ctrip.com
+hostname = m.ctrip.com

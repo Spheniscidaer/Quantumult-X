@@ -75,11 +75,11 @@ async function activity_taskInfo() {
 async function share() {
     console.log('开始分享');
     for (i = $.taskInfo.data.shareTaskInfo.hasSharedTimes; i < $.taskInfo.data.shareTaskInfo.shareLimit; i++) {
-        await activity_taskInfo();
         if ($.taskInfo.data.shareTaskInfo.hasSharedTimes === $.taskInfo.data.shareTaskInfo.shareLimit) {
             break;
         }
         await shareTask();
+        await activity_taskInfo();
         if ($.shareInfo) {
             console.log('任务执行：' + $.shareInfo.errMsg + ' ' + $.taskInfo.data.shareTaskInfo.hasSharedTimes + '/' + $.taskInfo.data.shareTaskInfo.shareLimit);
         }
@@ -102,11 +102,11 @@ async function activity() {
 async function product() {
     console.log('开始关注商品');
     for (i = $.taskInfo.data.taskInfo[1].finishNum; i < $.taskInfo.data.taskInfo[1].allValues.length; i++) {
-        await activity_taskInfo();
         if ($.taskInfo.data.taskInfo[1].allValues.length === $.taskInfo.data.taskInfo[1].finishNum) {
             break;
         }
         await productForactivity(i);
+        await activity_taskInfo();
         console.log($.taskInfo.data.taskInfo[1].allValues[i].id + ' ' + $.taskInfo.data.taskInfo[1].finishNum + '/' + $.taskInfo.data.taskInfo[1].allValues.length);
         if ($.productInfo) {
             console.log($.productInfo.errMsg);
@@ -215,7 +215,7 @@ function taskGetUrl(functionId, body) {
             'Host': `api.m.jd.com`,
             'Accept-Encoding': `gzip, deflate, br`,
             'Accept-Language': `zh-cn`,
-            'User-Agent': `jdapp;iPhone;9.2.2;14.2;`
+            'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;")
         },
     }
 }

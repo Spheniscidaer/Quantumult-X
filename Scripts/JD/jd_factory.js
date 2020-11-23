@@ -417,7 +417,7 @@ function taskUrl(function_id, body = {}) {
             'Accept-Encoding': `gzip, deflate, br`,
             'Accept-Language': `zh-cn`,
             'Content-Type': `application/x-www-form-urlencoded`,
-            'User-Agent': `jdapp;iPhone;9.2.0;14.1;`
+            'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;")
         }
     }
 }
@@ -434,7 +434,7 @@ function taskPostUrl(functionId, body) {
             'Accept-Encoding': `gzip, deflate, br`,
             'Accept-Language': `zh-cn`,
             'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': `jdapp;iPhone;9.2.0;14.1;`
+            'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;")
         },
         body: `functionId=${functionId}&body={${body}}&client=wh5&clientVersion=1.0.0`
     }

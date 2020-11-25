@@ -511,6 +511,46 @@ function ClickFavArticle(cookie, articleId) {
     })
 }
 
+// 每日抽奖
+function LotteryDraw(cookie, activeId = '7mV1llk1l9') {
+    return new Promise((resolve) => {
+        let options = {
+            url: `https://zhiyou.smzdm.com/user/lottery/jsonp_draw?callback=jQuery34109305207178886287_${new Date().getTime()}&active_id=${activeId}&_=${new Date().getTime()}`,
+            headers: {
+                "Accept": "*/*",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept-Language": "zh-cn",
+                "Connection": "keep-alive",
+                "Cookie": cookie,
+                "Host": "zhiyou.smzdm.com",
+                "Referer": "https://m.smzdm.com/zhuanti/life/choujiang/",
+                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148/smzdm 9.9.0 rv:91 (iPhone 11 Pro Max; iOS 14.2; zh_CN)/iphone_smzdmapp/9.9.0/wkwebview/jsbv_1.0.0"
+            }
+        };
+        magicJS.get(options, (err, resp, data) => {
+            if (err) {
+                magicJS.logWarning(`每日抽奖失败，请求异常：${articleId}`);
+                resolve('每日抽奖失败，请求异常');
+            } else {
+                try {
+                    let newData = /\((.*)\)/.exec(data);
+                    let obj = JSON.parse(newData[1]);
+                    if (obj.error_code == 0 || obj.error_code == 1) {
+                        magicJS.logDebug(obj.error_msg);
+                        resolve(obj.error_msg);
+                    } else {
+                        magicJS.logWarning(`每日抽奖失败，接口响应异常：${data}`);
+                        resolve('每日抽奖失败，接口响应异常');
+                    }
+                } catch (err) {
+                    magicJS.logWarning(`每日抽奖失败，请求异常：${err}`);
+                    resolve('每日抽奖失败，请求异常');
+                }
+            }
+        });
+    })
+}
+
 async function Main() {
     // 获取Cookie与账号密码
     if (magicJS.isRequest) {
@@ -586,19 +626,22 @@ async function Main() {
             let appCheckinErr = null;
             let appCheckinStr = '';
 
+            // 抽奖结果消息
+            let lotteryStr = '';
+
             // 任务完成情况
             let clickGoBuyTimes = 0;
             let clickLikePrductTimes = 0;
             let clickLikeArticleTimes = 0;
             let clickFavArticleTimes = 0;
 
-            // ---------------------- 查询签到前用户数据 ---------------------- 
+            // ---------------------- 查询签到前用户数据 ----------------------
             let [, , , beforeExp, , beforePrestige, ] = await WebGetCurrentInfoNewVersion(smzdmCookie);
             let [nickName, avatar, beforeVIPLevel, beforeHasCheckin, , beforeNotice, , , beforePoint, beforeGold, beforeSilver] = await WebGetCurrentInfo(smzdmCookie);
 
             magicJS.logInfo(`昵称：${nickName}\nWeb端签到状态：${beforeHasCheckin}\n签到前等级${beforeVIPLevel}，积分${beforePoint}，经验${beforeExp}，金币${beforeGold}，碎银子${beforeSilver}，威望${beforePrestige}, 未读消息${beforeNotice}`);
 
-            // ---------------------- 开始签到 ---------------------- 
+            // ---------------------- 开始签到 ----------------------
 
             // App端签到
             let account = !!smzdmAccount ? smzdmAccount : magicJS.read(smzdmAccountKey);
@@ -643,7 +686,10 @@ async function Main() {
                 [webCheckinErr, [webCheckinResult, webCheckinStr]] = [null, [true, '重复签到']];
             }
 
-            // ---------------------- 每日完成任务 ---------------------- 
+            // ---------------------- 每日抽奖 ----------------------
+            lotteryStr = await LotteryDraw(smzdmCookie, '7mV1llk1l9');
+
+            // ---------------------- 每日完成任务 ----------------------
 
             // 获取去购买和好价Id列表
             let [goBuyList, likProductList] = await GetProductList();
@@ -712,7 +758,7 @@ async function Main() {
             await Promise.all([clickGoBuyAsync(), clickLikeProductAsync()]);
             await Promise.all([clickLikeArticleAsync(), clickFavArticleAsync()]);
 
-            // ---------------------- 查询签到后用户数据 ---------------------- 
+            // ---------------------- 查询签到后用户数据 ----------------------
             // 休眠3秒再查询，减少延迟显示的情况
             await magicJS.sleep(3000);
             let [, afteruserPointList, , afterExp, , afterPrestige, ] = await WebGetCurrentInfoNewVersion(smzdmCookie);
@@ -743,6 +789,11 @@ async function Main() {
                     '碎银子' + afterSilver + (addSilver > 0 ? '(+' + addSilver + ')' : '') +
                     ' 威望' + afterPrestige + (addPrestige > 0 ? '(+' + addPrestige + ')' : '') +
                     ' 未读消息' + afterNotice;
+            }
+
+            // 抽奖结果通知
+            if (!!lotteryStr) {
+                content += `\n${lotteryStr}`;
             }
 
             content += `\n点值 ${clickLikePrductTimes}/${clickLikeProductMaxTimes} 去购买 ${clickGoBuyTimes}/${clickGoBuyMaxTimes}\n点赞 ${clickLikeArticleTimes}/${clickLikeArticleMaxTimes} 收藏 ${clickLikeArticleTimes}/${clickFavArticleTimes}`

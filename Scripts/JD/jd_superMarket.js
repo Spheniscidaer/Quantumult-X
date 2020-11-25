@@ -2,7 +2,7 @@
  * @Author: lxk0301 https://github.com/lxk0301
  * @Date: 2020-08-16 18:54:16
  * @Last Modified by: lxk0301
- * @Last Modified time: 2020-11-22 08:22:37
+ * @Last Modified time: 2020-11-24 08:22:37
  */
 /*
 东东超市(活动入口：京东APP-》首页-》京东超市-》底部东东超市)
@@ -41,9 +41,9 @@ const JD_API_HOST = 'https://api.m.jd.com/api';
 //下面给出两个账号的填写示例（iOS只支持2个京东账号）
 let shareCodes = [ // IOS本地脚本用户这个列表填入你要助力的好友的shareCode
     //账号一的好友shareCode,不同好友的shareCode中间用@符号隔开
-    '',
+    '-4msulYas0O2JsRhE-2TA5XZmBQ@eU9Yar_mb_9z92_WmXNG0w@eU9YaejjYv4g8T2EwnsVhQ',
     //账号二的好友shareCode,不同好友的shareCode中间用@符号隔开
-    '',
+    'aURoM7PtY_Q@eU9Ya-y2N_5z9DvXwyIV0A@eU9YaOnjYK4j-GvWmXIWhA',
 ]
 
 !(async() => {
@@ -400,6 +400,8 @@ async function businessCircleActivity() {
     } else if (pkStatus === 3) {
       console.log(`商圈PK暂停中\n`)
     }
+  } else {
+    console.log(`\n${JSON.stringify(smtg_getTeamPkDetailInfoRes)}\n`)
   }
   return
   const businessCirclePKDetailRes = await smtg_businessCirclePKDetail();
@@ -649,8 +651,11 @@ async function manageProduct() {
             productList2.push(item1);
           }
         }
+        // console.log(`productNow${JSON.stringify(productNow)}`)
+        // console.log(`productList2${JSON.stringify(productList2)}`)
         if (productList2 && productList2.length > 0) {
           productList2.sort(sortTotalPriceGold);
+          // console.log(productList2)
           if (productNow && productNow.length > 0) {
             if (productList2.slice(-1)[0]['productId'] === productNow[0]['productId']) {
               console.log(`货架[${item.shelfId}]${productNow[0]['name']}已上架\n`)
@@ -1340,7 +1345,21 @@ function sortSyData(a, b) {
 function sortTotalPriceGold(a, b) {
   return a['previewTotalPriceGold'] - b['previewTotalPriceGold']
 }
-
+//格式化助力码
+function shareCodesFormat() {
+  return new Promise(resolve => {
+    console.log(`第${$.index}个京东账号的助力码:::${jdSuperMarketShareArr[$.index - 1]}`)
+    if (jdSuperMarketShareArr[$.index - 1]) {
+      newShareCodes = jdSuperMarketShareArr[$.index - 1].split('@');
+    } else {
+      console.log(`由于您未提供与京京东账号相对应的shareCode,下面助力将采纳本脚本自带的助力码\n`)
+      const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
+      newShareCodes = shareCodes[tempIndex].split('@');
+    }
+    console.log(`格式化后第${$.index}个京东账号的助力码${JSON.stringify(newShareCodes)}`)
+    resolve();
+  })
+}
 function requireConfig() {
   return new Promise(resolve => {
     // console.log('\n开始获取京小超配置文件\n')
@@ -1360,6 +1379,8 @@ function requireConfig() {
     }
     console.log(`共${cookiesArr.length}个京东账号\n`);
     console.log(`京小超已改版,目前暂不用助力, 故无助力码`)
+    // console.log(`\n京小超商圈助力码::${JSON.stringify(jdSuperMarketShareArr)}`);
+    // console.log(`您提供了${jdSuperMarketShareArr.length}个账号的助力码\n`);
     resolve()
   })
 }

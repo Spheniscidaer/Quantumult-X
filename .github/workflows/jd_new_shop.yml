@@ -25,7 +25,7 @@ jobs:
       - name: npm install
         run: |
           npm install
-      - name: '运行 【京东抽奖机】'
+      - name: '运行 【京东新店福利】'
         run: |
           node Scripts/JD/jd_new_shop.js
         env:

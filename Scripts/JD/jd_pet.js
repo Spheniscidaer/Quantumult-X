@@ -27,6 +27,7 @@ const $ = new Env('东东萌宠');
 let cookiesArr = [],
     cookie = '',
     jdPetShareArr = [],
+    isBox = false,
     notify, newShareCodes;
 //助力好友分享码(最多5个,否则后面的助力失败),原因:京东农场每人每天只有四次助力机会
 //此此内容是IOS用户下载脚本到本地使用，填写互助码的地方，同一京东账号的好友互助码请使用@符号隔开。
@@ -142,7 +143,7 @@ async function energyCollect() {
     let function_id = arguments.callee.name.toString();
     const response = await request(function_id);
     // console.log(`收取任务奖励好感度完成:${JSON.stringify(response)}`);
-    if (response.code === '0') {
+    if (response.resultCode === '0') {
         message += `【第${response.result.medalNum + 1}块勋章完成进度】${response.result.medalPercent}%，还需收集${response.result.needCollectEnergy}好感\n`;
         message += `【已获得勋章】${response.result.medalNum}块，还需收集${response.result.needCollectMedalNum}块即可兑换奖品“${$.petInfo.goodsInfo.goodsName}”\n`;
     }
@@ -168,7 +169,7 @@ async function feedPetsAgain() {
             // message += `【剩余狗粮】${$.petInfo.foodAmount}g\n`;
         } else {
             console.log("目前剩余狗粮：【" + foodAmount + "】g,不再继续投食,保留部分狗粮用于完成第二天任务");
-            subTitle = $.petInfo.goodsInfo.goodsName;
+            subTitle = $.petInfo.goodsInfo && $.petInfo.goodsInfo.goodsName;
             // message += `【与爱宠相识】${$.petInfo.meetDays}天\n`;
             // message += `【剩余狗粮】${$.petInfo.foodAmount}g\n`;
         }
@@ -271,7 +272,7 @@ async function slaveHelp() {
         let response = await request(arguments.callee.name.toString(), { 'shareCode': code });
         if (response.code === '0' && response.resultCode === '0') {
             if (response.result.helpStatus === 0) {
-                console.log('已给好友: 【' + response.result.masterNickName + '】助力');
+                console.log('已给好友: 【' + response.result.masterNickName + '】助力成功');
                 helpPeoples += response.result.masterNickName + '，';
             } else if (response.result.helpStatus === 1) {
                 // 您今日已无助力机会

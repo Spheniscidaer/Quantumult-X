@@ -36,12 +36,12 @@ const JD_API_HOST = 'https://api.m.jd.com/api';
             $.errorMsg = '';
             $.index = i + 1;
             await activity_taskInfo();
-            await activity();
-            await share();
-            await product();
+            //await activity();
+            //await share();
+            //await product();
             await shop();
-            await prize_list();
-            await rank();
+            //await prize_list();
+            //await rank();
             await showMsg();
         }
     }
@@ -161,9 +161,9 @@ async function shareTask() {
 
 // 逛会场API
 async function meetForactivity() {
-    const functionId = `activity_taskInfo`;
-    const value = $.taskInfo.data.taskInfo[0].allValues.value;
-    const body = `'hallld':'${value}'`;
+    const functionId = `activity_stroll`;
+    const value = $.taskInfo.data.taskInfo[0].allValues[0].value;
+    const body = `'hallId':'${value}'`;
     $.meetInfo = await get(functionId, body);
 }
 
@@ -177,9 +177,9 @@ async function productForactivity(i) {
 
 // 关注店铺API
 async function shopForactivity() {
-    const functionId = `activity_stroll`;
+    const functionId = `activity_followShop`;
     const value = $.taskInfo.data.taskInfo[2].allValues[0].value;
-    const body = `hallId':'${value}'`;
+    const body = `'shopId':'${value}'`;
     $.shopInfo = await get(functionId, body);
 }
 

@@ -36,12 +36,12 @@ const JD_API_HOST = 'https://api.m.jd.com/api';
             $.errorMsg = '';
             $.index = i + 1;
             await activity_taskInfo();
-            //await activity();
-            //await share();
-            //await product();
+            await activity();
+            await share();
+            await product();
             await shop();
-            //await prize_list();
-            //await rank();
+            await prize_list();
+            await rank();
             await showMsg();
         }
     }

@@ -1,6 +1,6 @@
 /*
 东东萌宠 更新地址： https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_pet.js
-更新时间：2020-11-21
+更新时间：2020-11-30
 已支持IOS双京东账号,Node.js支持N个京东账号
 脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
 
@@ -94,7 +94,12 @@ async function jdPet() {
     if (initPetTownRes.code === '0' && initPetTownRes.resultCode === '0' && initPetTownRes.message === 'success') {
         $.petInfo = initPetTownRes.result;
         if ($.petInfo.userStatus === 0) {
-            $.msg($.name, '【提示】此账号萌宠活动未开始，请手动去京东APP开启活动\n入口：我的->游戏与互动->查看更多', '', { "open-url": "openapp.jdmoble://" });
+            $.msg($.name, '', `【提示】京东账号${$.index}${$.nickName}\n萌宠活动未开启\n请手动去京东APP开启活动\n入口：我的->游戏与互动->查看更多开启`, { "open-url": "openapp.jdmoble://" });
+            return
+        }
+        if (!$.petInfo.goodsInfo) {
+            $.msg($.name, '', `【提示】京东账号${$.index}${$.nickName}\n暂未选购新的商品`, { "open-url": "openapp.jdmoble://" });
+            await notify.sendNotify(`${$.name} - ${$.index} - ${$.nickName}`, `【提示】京东账号${$.index}${$.nickName}\n暂未选购新的商品`);
             return
         }
         goodsUrl = $.petInfo.goodsInfo && $.petInfo.goodsInfo.goodsUrl;
@@ -198,9 +203,9 @@ async function doTask() {
     if (threeMealInit && !threeMealInit.finished) {
         if (threeMealInit.timeRange === -1) {
             console.log(`未到三餐时间`);
-            return
+        } else {
+            await threeMealInitFun();
         }
-        await threeMealInitFun();
     }
     if (browseShopsInit && !browseShopsInit.finished) {
         await browseShopsInitFun();
@@ -521,7 +526,7 @@ function TotalBean() {
 async function request(function_id, body = {}) {
     await $.wait(3000); //歇口气儿, 不然会报操作频繁
     return new Promise((resolve, reject) => {
-        $.get(taskUrl(function_id, body), (err, resp, data) => {
+        $.post(taskUrl(function_id, body), (err, resp, data) => {
             try {
                 if (err) {
                     console.log('\n东东萌宠: API查询请求失败 ‼️‼️');
@@ -540,15 +545,19 @@ async function request(function_id, body = {}) {
 }
 
 function taskUrl(function_id, body = {}) {
+    body["version"] = 2;
+    body["channel"] = 'app';
     return {
-        url: `${JD_API_HOST}?functionId=${function_id}&appid=wh5&loginWQBiz=pet-town&body=${escape(JSON.stringify(body))}`,
+        url: `${JD_API_HOST}?functionId=${function_id}`,
+        body: `body=${escape(JSON.stringify(body))}&appid=wh5&loginWQBiz=pet-town&clientVersion=9.0.4`,
         headers: {
-            Cookie: cookie,
-            UserAgent: $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
+            'Cookie': cookie,
+            'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
+            'Host': 'api.m.jd.com',
+            'Content-Type': 'application/x-www-form-urlencoded',
         }
     };
 }
-
 // prettier-ignore
 function Env(t, e) {
     class s {

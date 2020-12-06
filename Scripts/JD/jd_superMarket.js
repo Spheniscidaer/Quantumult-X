@@ -708,8 +708,7 @@ async function limitTimeProduct() {
   }
 }
 
-//=============================================脚本使用到的京东API=====================================
-function updatePkActivityId(url = 'https://raw.githubusercontent.com/lxk0301/updateTeam/master/jd_updateTeam.json') {
+function updatePkActivityId(url = 'https://raw.githubusercontent.com/799953468/JD_sharecode/master/sharecode/jd_updateTeam.json') {
   return new Promise(resolve => {
     //https://cdn.jsdelivr.net/gh/lxk0301/updateTeam@master/jd_updateTeam.json
     //https://raw.githubusercontent.com/lxk0301/updateTeam/master/jd_updateTeam.json
@@ -729,7 +728,7 @@ function updatePkActivityId(url = 'https://raw.githubusercontent.com/lxk0301/upd
     })
   })
 }
-function updatePkActivityIdCDN(url = 'https://cdn.jsdelivr.net/gh/lxk0301/updateTeam@master/jd_updateTeam.json') {
+function updatePkActivityIdCDN(url = 'https://raw.fastgit.org/799953468/JD_sharecode/master/sharecode/jd_updateTeam.json') {
   return new Promise(resolve => {
     //https://cdn.jsdelivr.net/gh/lxk0301/updateTeam@master/jd_updateTeam.json
     //https://raw.githubusercontent.com/lxk0301/updateTeam/master/jd_updateTeam.json

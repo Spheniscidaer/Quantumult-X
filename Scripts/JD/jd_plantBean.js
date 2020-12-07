@@ -29,6 +29,7 @@ let jdNotify = true; //是否开启静默运行。默认true开启
 let cookiesArr = [],
     cookie = '',
     jdPlantBeanShareArr = [],
+    isBox = false,
     notify, newShareCodes, option, message, subTitle;
 //京东接口地址
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
@@ -99,7 +100,7 @@ async function jdPlantBean() {
         awardState = roundList[0].awardState;
         $.taskList = $.plantBeanIndexResult.data.taskList;
         subTitle = `【京东昵称】${$.plantBeanIndexResult.data.plantUserInfo.plantNickName}`;
-        message += `【上期时间】${roundList[0].dateDesc}\n`;
+        message += `【上期时间】${roundList[0].dateDesc.replace('上期 ', '')}\n`;
         message += `【上期成长值】${roundList[0].growth}\n`;
         await receiveNutrients(); //定时领取营养液
         await doHelp(); //助力
@@ -517,6 +518,7 @@ function shareCodesFormat() {
         newShareCodes = [];
         const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
         newShareCodes = shareCodes[tempIndex].split('@');
+        console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify(newShareCodes)}`)
         resolve();
     })
 }

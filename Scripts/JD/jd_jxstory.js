@@ -551,8 +551,10 @@ function readShareCode() {
 //格式化助力码
 function shareCodesFormat() {
     return new Promise(async resolve => {
-        const tempIndex = $.index > inviteCodes.length ? (inviteCodes.length - 1) : ($.index - 1);
-        $.newShareCodes = inviteCodes[tempIndex].split('@');
+        newShareCodes = [];
+        const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
+        newShareCodes = shareCodes[tempIndex].split('@');
+        console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify(newShareCodes)}`)
         resolve();
     })
 }

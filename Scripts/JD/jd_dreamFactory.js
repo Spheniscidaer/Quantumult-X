@@ -1,6 +1,6 @@
 /*
 京东京喜工厂
-更新时间：2020-12-05
+更新时间：2020-12-07
 活动入口 :京东APP->游戏与互动->查看更多->京喜工厂
 或者: 京东APP首页搜索 "玩一玩" ,造物工厂即可
 
@@ -31,7 +31,8 @@ const JD_API_HOST = 'https://m.jingxi.com';
 const notify = $.isNode() ? require('./sendNotify') : '';
 let jdNotify = true; //是否关闭通知，false打开通知推送，true关闭通知推送
 const randomCount = $.isNode() ? 20 : 5;
-const tuanActiveId = `jfkcidGQavswLOBcAWljrw==`;
+const tuanActiveId = `gaVXW_NJ0KPEA2LyUhoXzA==`;
+const jxOpenUrl = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%20%22des%22:%20%22m%22,%20%22url%22:%20%22https://wqsd.jd.com/pingou/dream_factory/index.html%22%20%7D`;
 let cookiesArr = [],
     cookie = '',
     message = '';
@@ -100,6 +101,7 @@ async function jdDreamFactory() {
     await stealFriend();
     await tuanActivity();
     await QueryAllTuan();
+    await exchangeProNotify();
     await showMsg();
 }
 
@@ -275,7 +277,6 @@ function getUserElectricity() {
 //查询有多少的招工电力可收取
 function QueryHireReward() {
     return new Promise(async resolve => {
-        // const url = `/dreamfactory/friend/HireAward?zone=dream_factory&date=${new Date().Format("yyyyMMdd")}&type=0&sceneval=2&g_login_type=1`
         $.get(taskurl('friend/QueryHireReward'), async(err, resp, data) => {
             try {
                 if (err) {
@@ -287,7 +288,7 @@ function QueryHireReward() {
                         if (data['ret'] === 0) {
                             for (let item of data['data']['hireReward']) {
                                 if (item.date !== new Date(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000).Format("yyyyMMdd")) {
-                                    await hireAward(item.date);
+                                    await hireAward(item.date, item.type);
                                 }
                             }
                         } else {
@@ -304,9 +305,9 @@ function QueryHireReward() {
     })
 }
 // 收取招工电力
-function hireAward(date) {
+function hireAward(date, type = 0) {
     return new Promise(async resolve => {
-        $.get(taskurl('friend/HireAward', `date=${date}&type=0`), async(err, resp, data) => {
+        $.get(taskurl('friend/HireAward', `date=${date}&type=${type}`), async(err, resp, data) => {
             try {
                 if (err) {
                     console.log(`${JSON.stringify(err)}`)
@@ -359,7 +360,6 @@ async function helpFriends() {
 // 帮助用户
 function assistFriend(sharepin) {
     return new Promise(async resolve => {
-        // const url = `/dreamfactory/friend/AssistFriend?zone=dream_factory&sharepin=${escape(sharepin)}&sceneval=2&g_login_type=1`
         const options = {
             'url': `https://m.jingxi.com/dreamfactory/friend/AssistFriend?zone=dream_factory&sharepin=${escape(sharepin)}&sceneval=2&g_login_type=1`,
             'headers': {
@@ -411,7 +411,7 @@ function QueryFriendList() {
                             $.log(`【今日招工进度】${hireListToday.length}/${hireNumMax}`);
                             message += `【招工进度】${hireListToday.length}/${hireNumMax}\n`;
                         } else {
-                            console.log(`异常：${JSON.stringify(data)}`)
+                            console.log(`QueryFriendList异常：${JSON.stringify(data)}`)
                         }
                     }
                 }
@@ -472,7 +472,7 @@ function doTask(taskId) {
                         if (data['ret'] === 0) {
                             console.log("做任务完成！")
                         } else {
-                            console.log(`异常：${JSON.stringify(data)}`)
+                            console.log(`DoTask异常：${JSON.stringify(data)}`)
                         }
                     }
                 }
@@ -500,6 +500,7 @@ function userInfo() {
                             data = data['data'];
                             $.unActive = true; //标记是否开启了京喜活动或者选购了商品进行生产
                             $.encryptPin = '';
+                            $.shelvesList = [];
                             if (data.factoryList && data.productionList) {
                                 const production = data.productionList[0];
                                 const factory = data.factoryList[0];
@@ -519,14 +520,15 @@ function userInfo() {
                                 console.log(`当前电力：${data.user.electric}`)
                                 console.log(`当前等级：${data.user.currentLevel}`)
                                 console.log(`分享码: ${data.user.encryptPin}`);
+                                console.log(`已投入电力：${production.investedElectric}`);
+                                console.log(`所需电力：${production.needElectric}`);
                                 console.log(`生产进度：${((production.investedElectric / production.needElectric) * 100).toFixed(2)}%`);
                                 message += `【京东账号${$.index}】${$.nickName}\n`
                                 message += `【生产商品】${$.productName}\n`;
                                 message += `【当前等级】${data.user.userIdentity} ${data.user.currentLevel}\n`;
                                 message += `【生产进度】${((production.investedElectric / production.needElectric) * 100).toFixed(2)}%\n`;
                                 if (production.investedElectric >= production.needElectric) {
-                                    $.msg($.name, ``, `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}\n已生产完,请速去京喜APP->首页->好物0元造进行兑换`, { 'open-url': 'openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%20%22des%22:%20%22m%22,%20%22url%22:%20%22https://wqsd.jd.com/pingou/dream_factory/index.html%22%20%7D' })
-                                    await notify.sendNotify(`${$.name} - 京东账号${$.index} - ${$.nickName}`, `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}\n已生产完,请速去京喜APP->首页->好物0元造进行兑换`)
+                                    $.log(`可以兑换商品了`)
                                 }
                             } else {
                                 $.unActive = false; //标记是否开启了京喜活动或者选购了商品进行生产
@@ -539,7 +541,7 @@ function userInfo() {
                                 }
                             }
                         } else {
-                            console.log(`异常：${JSON.stringify(data)}`)
+                            console.log(`GetUserInfo异常：${JSON.stringify(data)}`)
                         }
                     }
                 }
@@ -566,7 +568,39 @@ function GetCommodityDetails() {
                             data = data['data'];
                             $.productName = data['commodityList'][0].name;
                         } else {
-                            console.log(`异常：${JSON.stringify(data)}`)
+                            console.log(`GetCommodityDetails异常：${JSON.stringify(data)}`)
+                        }
+                    }
+                }
+            } catch (e) {
+                $.logErr(e, resp)
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
+// 查询已完成商品
+function GetShelvesList(pageNo = 1) {
+    return new Promise(async resolve => {
+        $.get(taskurl('userinfo/GetShelvesList', `pageNo=${pageNo}&pageSize=12`), (err, resp, data) => {
+            try {
+                if (err) {
+                    console.log(`${JSON.stringify(err)}`)
+                    console.log(`${$.name} API请求失败，请检查网路重试`)
+                } else {
+                    if (safeGet(data)) {
+                        data = JSON.parse(data);
+                        if (data['ret'] === 0) {
+                            data = data['data'];
+                            const { shelvesList } = data;
+                            if (shelvesList) {
+                                $.shelvesList = [...$.shelvesList, ...shelvesList];
+                                pageNo++
+                                GetShelvesList(pageNo);
+                            }
+                        } else {
+                            console.log(`GetShelvesList异常：${JSON.stringify(data)}`)
                         }
                     }
                 }
@@ -598,6 +632,7 @@ function DrawProductionStagePrize() {
     })
 }
 async function PickUp(encryptPin = $.encryptPin, help = false) {
+    $.pickUpMyselfComponent = true;
     const GetUserComponentRes = await GetUserComponent(encryptPin);
     if (GetUserComponentRes && GetUserComponentRes['ret'] === 0) {
         const { componentList } = GetUserComponentRes['data'];
@@ -607,6 +642,7 @@ async function PickUp(encryptPin = $.encryptPin, help = false) {
             } else {
                 $.log(`自家地下暂无零件可收`)
             }
+            $.pickUpMyselfComponent = false;
         }
         for (let item of componentList) {
             await $.wait(1000);
@@ -625,7 +661,8 @@ async function PickUp(encryptPin = $.encryptPin, help = false) {
                     if (help) {
                         console.log(`收好友[${encryptPin}]零件失败：${PickUpComponentRes.msg},直接跳出`)
                     } else {
-                        console.log(`收自己地下零件失败：${PickUpComponentRes.msg},直接跳出`)
+                        console.log(`收自己地下零件失败：${PickUpComponentRes.msg},直接跳出`);
+                        $.pickUpMyselfComponent = false;
                     }
                     break
                 }
@@ -671,22 +708,6 @@ function PickUpComponent(index, encryptPin) {
                 } else {
                     if (safeGet(data)) {
                         data = JSON.parse(data);
-                        // if (data['ret'] === 0) {
-                        //   data = data['data'];
-                        //   if (help) {
-                        //     console.log(`收取好友[${encryptPin}]零件成功:获得${data['increaseElectric']}电力\n`);
-                        //     $.pickFriendEle += data['increaseElectric'];
-                        //   } else {
-                        //     console.log(`收取自家零件成功:获得${data['increaseElectric']}电力\n`);
-                        //     $.pickEle += data['increaseElectric'];
-                        //   }
-                        // } else {
-                        //   if (help) {
-                        //     console.log(`收好友[${encryptPin}]零件失败：${JSON.stringify(data)}`)
-                        //   } else {
-                        //     console.log(`收零件失败：${JSON.stringify(data)}`)
-                        //   }
-                        // }
                     }
                 }
             } catch (e) {
@@ -699,6 +720,10 @@ function PickUpComponent(index, encryptPin) {
 }
 //偷好友的电力
 async function stealFriend() {
+    if (!$.pickUpMyselfComponent) {
+        $.log(`今日收取零件已达上限，偷好友零件也达到上限，故跳出`)
+        return
+    }
     await getFriendList();
     $.friendList = [...new Set($.friendList)];
     for (let i = 0; i < $.friendList.length; i++) {
@@ -707,8 +732,6 @@ async function stealFriend() {
             continue
         }
         await PickUp(pin, true);
-        // await getFactoryIdByPin(pin);//获取好友工厂ID
-        // if ($.stealFactoryId) await collectElectricity($.stealFactoryId,true, pin);
     }
 }
 
@@ -1132,325 +1155,208 @@ function updateTuanIdsCDN(url = 'https://raw.fastgit.org/799953468/JD_shareCode/
         })
     })
 }
+
+function checkExchange() {
+
+}
+//商品可兑换时的通知
+async function exchangeProNotify() {
+    await GetShelvesList();
+    let exchangeEndTime, exchangeEndHours, nowHours;
+    //脚本运行的UTC+8时区的时间戳
+    let nowTimes = new Date(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000);
+    if ($.shelvesList && $.shelvesList.length > 0) console.log(`\n  商品名     兑换状态`)
+    for (let shel of $.shelvesList) {
+        console.log(`${shel['name']}    ${shel['exchangeStatus'] === 1 ? '未兑换' : shel['exchangeStatus'] === 2 ? '已兑换' : '兑换超时'}`)
+        if (shel['exchangeStatus'] === 1) {
+            exchangeEndTime = shel['exchangeEndTime'] * 1000;
+            $.picture = shel['picture'];
+            // 兑换截止时间点
+            exchangeEndHours = new Date(exchangeEndTime + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000).getHours();
+            //兑换截止时间(年月日 时分秒)
+            $.exchangeEndTime = new Date(exchangeEndTime + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000).toLocaleString('zh', { hour12: false });
+            //脚本运行此时的时间点
+            nowHours = nowTimes.getHours();
+        }
+    }
+    if (exchangeEndTime) {
+        //比如兑换(超时)截止时间是2020/12/8 09:20:04,现在时间是2020/12/6
+        if (nowTimes < exchangeEndTime) {
+            //还可以兑换
+            // 一:在兑换超时这一天(2020/12/8 09:20:04)的前2小时内通知
+            if ((exchangeEndTime - nowTimes) <= 3600000 * 2) {
+                $.msg($.name, ``, `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}${(exchangeEndTime - nowTimes) / 60*60*1000}分钟后兑换超时\n【兑换截止时间】${$.exchangeEndTime}\n请速去京喜APP->首页->好物0元造进行兑换`, { 'open-url': jxOpenUrl, 'media-url': $.picture })
+                await notify.sendNotify(`${$.name} - 京东账号${$.index} - ${$.nickName}`, `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}${(exchangeEndTime - nowTimes) / 60*60*1000}分钟后兑换超时\n【兑换截止时间】${$.exchangeEndTime}\n请速去京喜APP->首页->好物0元造进行兑换`, { url: jxOpenUrl })
+            }
+            //二:在兑换超时日期前的时间一天通知三次(2020/12/6 9,10,11点,以及在2020/12/7 9,10,11点各通知一次)
+            if (nowHours === exchangeEndHours || nowHours === (exchangeEndHours + 1) || nowHours === (exchangeEndHours + 2)) {
+                $.msg($.name, ``, `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}已可兑换\n【兑换截止时间】${$.exchangeEndTime}\n请速去京喜APP->首页->好物0元造进行兑换`, { 'open-url': jxOpenUrl, 'media-url': $.picture })
+                await notify.sendNotify(`${$.name} - 京东账号${$.index} - ${$.nickName}`, `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}已可兑换\n【兑换截止时间】${$.exchangeEndTime}\n请速去京喜APP->首页->好物0元造进行兑换`, { url: jxOpenUrl })
+            }
+        } else {
+            //兑换已超时
+            $.msg($.name, ``, `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}兑换已超时，请重新选择商品生产\n【兑换截止时间】${$.exchangeEndTime}`, { 'open-url': jxOpenUrl })
+            await notify.sendNotify(`${$.name} - 京东账号${$.index} - ${$.nickName}`, `【京东账号${$.index}】${$.nickName}\n【生产商品】${$.productName}兑换已超时，请重新选择商品生产\n【兑换截止时间】${$.exchangeEndTime}`, { url: jxOpenUrl })
+        }
+    }
+}
 async function showMsg() {
     return new Promise(async resolve => {
-        let ctrTemp;
-        if ($.isNode() && process.env.DREAMFACTORY_NOTIFY_CONTROL) {
-            ctrTemp = `${process.env.DREAMFACTORY_NOTIFY_CONTROL}` === 'false';
-        } else if ($.getdata('jdDreamFactory')) {
-            ctrTemp = $.getdata('jdDreamFactory') === 'false';
-        } else {
-            ctrTemp = `${jdNotify}` === 'false';
-        }
-        if (ctrTemp) {
-            $.msg($.name, '', message);
-            if ($.isNode()) {
-                await notify.sendNotify(`${$.name} - 账号${$.index} - ${$.nickName}`, `${message}\n【收取零件】获得${$.pickEle}电力`);
-            }
-        } else if (new Date().getHours() === 22) {
-            $.msg($.name, '', `${message}【收取自己零件】获得${$.pickEle}电力\n【收取${$.friendList.length}好友零件】获得${$.pickFriendEle}电力`)
-            $.log(`\n${message}【收取自己零件】获得${$.pickEle}电力\n【收取${$.friendList.length}好友零件】获得${$.pickFriendEle}电力`);
-        } else {
-            $.log(`\n${message}【收取自己零件】获得${$.pickEle}电力\n【收取${$.friendList.length}好友零件】获得${$.pickFriendEle}电力`);
-        }
-        resolve()
-    })
+                message += `【收取自己零件】${$.pickUpMyselfComponent ? `获得${$.pickEle}电力` : `今日已达上限`}\n`;
+    message += `【收取好友零件】${$.pickUpMyselfComponent ? `获得${$.pickFriendEle}电力` : `今日已达上限`}\n`;
+    let ctrTemp;
+    if ($.isNode() && process.env.DREAMFACTORY_NOTIFY_CONTROL) {
+      ctrTemp = `${process.env.DREAMFACTORY_NOTIFY_CONTROL}` === 'false';
+    } else if ($.getdata('jdDreamFactory')) {
+      ctrTemp = $.getdata('jdDreamFactory') === 'false';
+    } else {
+      ctrTemp = `${jdNotify}` === 'false';
+    }
+    if (ctrTemp) {
+      $.msg($.name, '', message);
+      if ($.isNode()) {
+        await notify.sendNotify(`${$.name} - 账号${$.index} - ${$.nickName}`, `${message}`);
+      }
+    } else if (new Date().getHours() === 22) {
+      $.msg($.name, '', `${message}`)
+      $.log(`\n${message}`);
+    } else {
+      $.log(`\n${message}`);
+    }
+    resolve()
+  })
 }
 
 //格式化助力码
 function shareCodesFormat() {
-    return new Promise(async resolve => {
-        const tempIndex = $.index > inviteCodes.length ? (inviteCodes.length - 1) : ($.index - 1);
-        $.newShareCodes = inviteCodes[tempIndex].split('@');
-        resolve();
-    })
+  return new Promise(async resolve => {
+    const tempIndex = $.index > inviteCodes.length ? (inviteCodes.length - 1) : ($.index - 1);
+    $.newShareCodes = inviteCodes[tempIndex].split('@');
+    console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify($.newShareCodes)}`)
+    resolve();
+  })
 }
-
 function requireConfig() {
-    return new Promise(resolve => {
-        console.log(`开始获取${$.name}配置文件\n`);
-        console.log(`共${cookiesArr.length}个京东账号\n`);
-        $.shareCodesArr = [];
-        if ($.isNode()) {
-            Object.keys(shareCodes).forEach((item) => {
-                if (shareCodes[item]) {
-                    $.shareCodesArr.push(shareCodes[item])
-                }
-            })
+  return new Promise(resolve => {
+    console.log(`开始获取${$.name}配置文件\n`);
+    //Node.js用户请在jdCookie.js处填写京东ck;
+    const shareCodes = $.isNode() ? require('./jdDreamFactoryShareCodes.js') : '';
+    console.log(`共${cookiesArr.length}个京东账号\n`);
+    $.shareCodesArr = [];
+    if ($.isNode()) {
+      Object.keys(shareCodes).forEach((item) => {
+        if (shareCodes[item]) {
+          $.shareCodesArr.push(shareCodes[item])
         }
-        console.log(`您提供了${$.shareCodesArr.length}个账号的${$.name}助力码\n`);
-        resolve()
-    })
-}
-
-function TotalBean() {
-    return new Promise(async resolve => {
-        const options = {
-            "url": `https://wq.jd.com/user/info/QueryJDUserInfo?sceneval=2`,
-            "headers": {
-                "Accept": "application/json,text/plain, */*",
-                "Content-Type": "application/x-www-form-urlencoded",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept-Language": "zh-cn",
-                "Connection": "keep-alive",
-                "Cookie": cookie,
-                "Referer": "https://wqs.jd.com/my/jingdou/my.shtml?sceneval=2",
-                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1"
-            }
-        }
-        $.post(options, (err, resp, data) => {
-            try {
-                if (err) {
-                    console.log(`${JSON.stringify(err)}`)
-                    console.log(`${$.name} API请求失败，请检查网路重试`)
-                } else {
-                    if (data) {
-                        data = JSON.parse(data);
-                        if (data['retcode'] === 13) {
-                            $.isLogin = false; //cookie过期
-                            return
-                        }
-                        $.nickName = data['base'].nickname;
-                    } else {
-                        console.log(`京东服务器返回空数据`)
-                    }
-                }
-            } catch (e) {
-                $.logErr(e, resp)
-            } finally {
-                resolve();
-            }
-        })
-    })
-}
-
-function safeGet(data) {
-    try {
-        if (typeof JSON.parse(data) == "object") {
-            return true;
-        }
-    } catch (e) {
-        console.log(e);
-        console.log(`京东服务器访问数据为空，请检查自身设备网络情况`);
-        return false;
+      })
     }
+    console.log(`您提供了${$.shareCodesArr.length}个账号的${$.name}助力码\n`);
+    resolve()
+  })
+}
+function TotalBean() {
+  return new Promise(async resolve => {
+    const options = {
+      "url": `https://wq.jd.com/user/info/QueryJDUserInfo?sceneval=2`,
+      "headers": {
+        "Accept": "application/json,text/plain, */*",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "zh-cn",
+        "Connection": "keep-alive",
+        "Cookie": cookie,
+        "Referer": "https://wqs.jd.com/my/jingdou/my.shtml?sceneval=2",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1"
+      }
+    }
+    $.post(options, (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(`${JSON.stringify(err)}`)
+          console.log(`${$.name} API请求失败，请检查网路重试`)
+        } else {
+          if (data) {
+            data = JSON.parse(data);
+            if (data['retcode'] === 13) {
+              $.isLogin = false; //cookie过期
+              return
+            }
+            $.nickName = data['base'].nickname;
+          } else {
+            console.log(`京东服务器返回空数据`)
+          }
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve();
+      }
+    })
+  })
+}
+function safeGet(data) {
+  try {
+    if (typeof JSON.parse(data) == "object") {
+      return true;
+    }
+  } catch (e) {
+    console.log(e);
+    console.log(`京东服务器访问数据为空，请检查自身设备网络情况`);
+    return false;
+  }
 }
 
 function taskurl(functionId, body = '') {
-    return {
-        url: `${JD_API_HOST}/dreamfactory/${functionId}?zone=dream_factory&${body}&sceneval=2&g_login_type=1&_time=${Date.now()}&_=${Date.now()}`,
-        headers: {
-            'Cookie': cookie,
-            'Host': 'm.jingxi.com',
-            'Accept': '*/*',
-            'Connection': 'keep-alive',
-            'User-Agent': 'jdpingou;iPhone;3.14.4;14.0;ae75259f6ca8378672006fc41079cd8c90c53be8;network/wifi;model/iPhone10,2;appBuild/100351;ADID/00000000-0000-0000-0000-000000000000;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/62;pap/JA2015_311210;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
-            'Accept-Language': 'zh-cn',
-            'Referer': 'https://wqsd.jd.com/pingou/dream_factory/index.html',
-            'Accept-Encoding': 'gzip, deflate, br',
-        }
+  return {
+    url: `${JD_API_HOST}/dreamfactory/${functionId}?zone=dream_factory&${body}&sceneval=2&g_login_type=1&_time=${Date.now()}&_=${Date.now()}`,
+    headers: {
+      'Cookie': cookie,
+      'Host': 'm.jingxi.com',
+      'Accept': '*/*',
+      'Connection': 'keep-alive',
+      'User-Agent': 'jdpingou;iPhone;3.14.4;14.0;ae75259f6ca8378672006fc41079cd8c90c53be8;network/wifi;model/iPhone10,2;appBuild/100351;ADID/00000000-0000-0000-0000-000000000000;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/62;pap/JA2015_311210;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+      'Accept-Language': 'zh-cn',
+      'Referer': 'https://wqsd.jd.com/pingou/dream_factory/index.html',
+      'Accept-Encoding': 'gzip, deflate, br',
     }
+  }
 }
-
 function newtasksysUrl(functionId, taskId) {
-    let url = `${JD_API_HOST}/newtasksys/newtasksys_front/${functionId}?source=dreamfactory&bizCode=dream_factory&sceneval=2&g_login_type=1&_time=${Date.now()}&_=${Date.now()}`;
-    if (taskId) {
-        url += `&taskId=${taskId}`;
+  let url = `${JD_API_HOST}/newtasksys/newtasksys_front/${functionId}?source=dreamfactory&bizCode=dream_factory&sceneval=2&g_login_type=1&_time=${Date.now()}&_=${Date.now()}`;
+  if (taskId) {
+    url += `&taskId=${taskId}`;
+  }
+  return {
+    url,
+    "headers": {
+      'Cookie': cookie,
+      'Host': 'm.jingxi.com',
+      'Accept': '*/*',
+      'Connection': 'keep-alive',
+      'User-Agent': "jdpingou;iPhone;3.15.2;13.5.1;90bab9217f465a83a99c0b554a946b0b0d5c2f7a;network/wifi;model/iPhone12,1;appBuild/100365;ADID/696F8BD2-0820-405C-AFC0-3C6D028040E5;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/14;pap/JA2015_311210;brand/apple;supportJDSHWK/1;",
+      'Accept-Language': 'zh-cn',
+      'Referer': 'https://wqsd.jd.com/pingou/dream_factory/index.html',
+      'Accept-Encoding': 'gzip, deflate, br',
     }
-    return {
-        url,
-        "headers": {
-            'Cookie': cookie,
-            'Host': 'm.jingxi.com',
-            'Accept': '*/*',
-            'Connection': 'keep-alive',
-            'User-Agent': "jdpingou;iPhone;3.15.2;13.5.1;90bab9217f465a83a99c0b554a946b0b0d5c2f7a;network/wifi;model/iPhone12,1;appBuild/100365;ADID/696F8BD2-0820-405C-AFC0-3C6D028040E5;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/14;pap/JA2015_311210;brand/apple;supportJDSHWK/1;",
-            'Accept-Language': 'zh-cn',
-            'Referer': 'https://wqsd.jd.com/pingou/dream_factory/index.html',
-            'Accept-Encoding': 'gzip, deflate, br',
-        }
-    }
+  }
 }
-Date.prototype.Format = function(fmt) { //author: meizz
-    var o = {
-        "M+": this.getMonth() + 1, //月份
-        "d+": this.getDate(), //日
-        "h+": this.getHours(), //小时
-        "m+": this.getMinutes(), //分
-        "s+": this.getSeconds(), //秒
-        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-        "S": this.getMilliseconds() //毫秒
-    };
-    if (/(y+)/.test(fmt))
-        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-    for (var k in o)
-        if (new RegExp("(" + k + ")").test(fmt))
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-    return fmt;
+Date.prototype.Format = function (fmt) { //author: meizz
+  var o = {
+    "M+": this.getMonth() + 1,                 //月份
+    "d+": this.getDate(),                    //日
+    "h+": this.getHours(),                   //小时
+    "m+": this.getMinutes(),                 //分
+    "s+": this.getSeconds(),                 //秒
+    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+    "S": this.getMilliseconds()             //毫秒
+  };
+  if (/(y+)/.test(fmt))
+    fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+  for (var k in o)
+    if (new RegExp("(" + k + ")").test(fmt))
+      fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+  return fmt;
 }
 
 // prettier-ignore
-function Env(t, e) {
-    class s {
-        constructor(t) { this.env = t }
-        send(t, e = "GET") { t = "string" == typeof t ? { url: t } : t; let s = this.get; return "POST" === e && (s = this.post), new Promise((e, i) => { s.call(this, t, (t, s, r) => { t ? i(t) : e(s) }) }) }
-        get(t) { return this.send.call(this.env, t) }
-        post(t) { return this.send.call(this.env, t, "POST") }
-    }
-    return new class {
-        constructor(t, e) { this.name = t, this.http = new s(this), this.data = null, this.dataFile = "box.dat", this.logs = [], this.isMute = !1, this.isNeedRewrite = !1, this.logSeparator = "\n", this.startTime = (new Date).getTime(), Object.assign(this, e), this.log("", `\ud83d\udd14${this.name}, \u5f00\u59cb!`) }
-        isNode() { return "undefined" != typeof module && !!module.exports }
-        isQuanX() { return "undefined" != typeof $task }
-        isSurge() { return "undefined" != typeof $httpClient && "undefined" == typeof $loon }
-        isLoon() { return "undefined" != typeof $loon }
-        toObj(t, e = null) { try { return JSON.parse(t) } catch { return e } }
-        toStr(t, e = null) { try { return JSON.stringify(t) } catch { return e } }
-        getjson(t, e) {
-            let s = e;
-            const i = this.getdata(t);
-            if (i) try { s = JSON.parse(this.getdata(t)) } catch {}
-            return s
-        }
-        setjson(t, e) { try { return this.setdata(JSON.stringify(t), e) } catch { return !1 } }
-        getScript(t) { return new Promise(e => { this.get({ url: t }, (t, s, i) => e(i)) }) }
-        runScript(t, e) {
-            return new Promise(s => {
-                let i = this.getdata("@chavy_boxjs_userCfgs.httpapi");
-                i = i ? i.replace(/\n/g, "").trim() : i;
-                let r = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout");
-                r = r ? 1 * r : 20, r = e && e.timeout ? e.timeout : r;
-                const [o, h] = i.split("@"), a = { url: `http://${h}/v1/scripting/evaluate`, body: { script_text: t, mock_type: "cron", timeout: r }, headers: { "X-Key": o, Accept: "*/*" } };
-                this.post(a, (t, e, i) => s(i))
-            }).catch(t => this.logErr(t))
-        }
-        loaddata() {
-            if (!this.isNode()) return {}; {
-                this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
-                const t = this.path.resolve(this.dataFile),
-                    e = this.path.resolve(process.cwd(), this.dataFile),
-                    s = this.fs.existsSync(t),
-                    i = !s && this.fs.existsSync(e);
-                if (!s && !i) return {}; { const i = s ? t : e; try { return JSON.parse(this.fs.readFileSync(i)) } catch (t) { return {} } }
-            }
-        }
-        writedata() {
-            if (this.isNode()) {
-                this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
-                const t = this.path.resolve(this.dataFile),
-                    e = this.path.resolve(process.cwd(), this.dataFile),
-                    s = this.fs.existsSync(t),
-                    i = !s && this.fs.existsSync(e),
-                    r = JSON.stringify(this.data);
-                s ? this.fs.writeFileSync(t, r) : i ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r)
-            }
-        }
-        lodash_get(t, e, s) {
-            const i = e.replace(/\[(\d+)\]/g, ".$1").split(".");
-            let r = t;
-            for (const t of i)
-                if (r = Object(r)[t], void 0 === r) return s;
-            return r
-        }
-        lodash_set(t, e, s) { return Object(t) !== t ? t : (Array.isArray(e) || (e = e.toString().match(/[^.[\]]+/g) || []), e.slice(0, -1).reduce((t, s, i) => Object(t[s]) === t[s] ? t[s] : t[s] = Math.abs(e[i + 1]) >> 0 == +e[i + 1] ? [] : {}, t)[e[e.length - 1]] = s, t) }
-        getdata(t) {
-            let e = this.getval(t);
-            if (/^@/.test(t)) {
-                const [, s, i] = /^@(.*?)\.(.*?)$/.exec(t), r = s ? this.getval(s) : "";
-                if (r) try {
-                    const t = JSON.parse(r);
-                    e = t ? this.lodash_get(t, i, "") : e
-                } catch (t) { e = "" }
-            }
-            return e
-        }
-        setdata(t, e) {
-            let s = !1;
-            if (/^@/.test(e)) {
-                const [, i, r] = /^@(.*?)\.(.*?)$/.exec(e), o = this.getval(i), h = i ? "null" === o ? null : o || "{}" : "{}";
-                try {
-                    const e = JSON.parse(h);
-                    this.lodash_set(e, r, t), s = this.setval(JSON.stringify(e), i)
-                } catch (e) {
-                    const o = {};
-                    this.lodash_set(o, r, t), s = this.setval(JSON.stringify(o), i)
-                }
-            } else s = this.setval(t, e);
-            return s
-        }
-        getval(t) { return this.isSurge() || this.isLoon() ? $persistentStore.read(t) : this.isQuanX() ? $prefs.valueForKey(t) : this.isNode() ? (this.data = this.loaddata(), this.data[t]) : this.data && this.data[t] || null }
-        setval(t, e) { return this.isSurge() || this.isLoon() ? $persistentStore.write(t, e) : this.isQuanX() ? $prefs.setValueForKey(t, e) : this.isNode() ? (this.data = this.loaddata(), this.data[e] = t, this.writedata(), !0) : this.data && this.data[e] || null }
-        initGotEnv(t) { this.got = this.got ? this.got : require("got"), this.cktough = this.cktough ? this.cktough : require("tough-cookie"), this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar, t && (t.headers = t.headers ? t.headers : {}, void 0 === t.headers.Cookie && void 0 === t.cookieJar && (t.cookieJar = this.ckjar)) }
-        get(t, e = (() => {})) {
-            t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"]), this.isSurge() || this.isLoon() ? (this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, { "X-Surge-Skip-Scripting": !1 })), $httpClient.get(t, (t, s, i) => {!t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) })) : this.isQuanX() ? (this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, { hints: !1 })), $task.fetch(t).then(t => {
-                const { statusCode: s, statusCode: i, headers: r, body: o } = t;
-                e(null, { status: s, statusCode: i, headers: r, body: o }, o)
-            }, t => e(t))) : this.isNode() && (this.initGotEnv(t), this.got(t).on("redirect", (t, e) => {
-                try {
-                    if (t.headers["set-cookie"]) {
-                        const s = t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString();
-                        s && this.ckjar.setCookieSync(s, null), e.cookieJar = this.ckjar
-                    }
-                } catch (t) { this.logErr(t) }
-            }).then(t => {
-                const { statusCode: s, statusCode: i, headers: r, body: o } = t;
-                e(null, { status: s, statusCode: i, headers: r, body: o }, o)
-            }, t => {
-                const { message: s, response: i } = t;
-                e(s, i, i && i.body)
-            }))
-        }
-        post(t, e = (() => {})) {
-            if (t.body && t.headers && !t.headers["Content-Type"] && (t.headers["Content-Type"] = "application/x-www-form-urlencoded"), t.headers && delete t.headers["Content-Length"], this.isSurge() || this.isLoon()) this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, { "X-Surge-Skip-Scripting": !1 })), $httpClient.post(t, (t, s, i) => {!t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) });
-            else if (this.isQuanX()) t.method = "POST", this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, { hints: !1 })), $task.fetch(t).then(t => {
-                const { statusCode: s, statusCode: i, headers: r, body: o } = t;
-                e(null, { status: s, statusCode: i, headers: r, body: o }, o)
-            }, t => e(t));
-            else if (this.isNode()) {
-                this.initGotEnv(t);
-                const { url: s, ...i } = t;
-                this.got.post(s, i).then(t => {
-                    const { statusCode: s, statusCode: i, headers: r, body: o } = t;
-                    e(null, { status: s, statusCode: i, headers: r, body: o }, o)
-                }, t => {
-                    const { message: s, response: i } = t;
-                    e(s, i, i && i.body)
-                })
-            }
-        }
-        time(t) { let e = { "M+": (new Date).getMonth() + 1, "d+": (new Date).getDate(), "H+": (new Date).getHours(), "m+": (new Date).getMinutes(), "s+": (new Date).getSeconds(), "q+": Math.floor(((new Date).getMonth() + 3) / 3), S: (new Date).getMilliseconds() }; /(y+)/.test(t) && (t = t.replace(RegExp.$1, ((new Date).getFullYear() + "").substr(4 - RegExp.$1.length))); for (let s in e) new RegExp("(" + s + ")").test(t) && (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? e[s] : ("00" + e[s]).substr(("" + e[s]).length))); return t }
-        msg(e = t, s = "", i = "", r) {
-            const o = t => {
-                if (!t) return t;
-                if ("string" == typeof t) return this.isLoon() ? t : this.isQuanX() ? { "open-url": t } : this.isSurge() ? { url: t } : void 0;
-                if ("object" == typeof t) {
-                    if (this.isLoon()) {
-                        let e = t.openUrl || t.url || t["open-url"],
-                            s = t.mediaUrl || t["media-url"];
-                        return { openUrl: e, mediaUrl: s }
-                    }
-                    if (this.isQuanX()) {
-                        let e = t["open-url"] || t.url || t.openUrl,
-                            s = t["media-url"] || t.mediaUrl;
-                        return { "open-url": e, "media-url": s }
-                    }
-                    if (this.isSurge()) { let e = t.url || t.openUrl || t["open-url"]; return { url: e } }
-                }
-            };
-            if (this.isMute || (this.isSurge() || this.isLoon() ? $notification.post(e, s, i, o(r)) : this.isQuanX() && $notify(e, s, i, o(r))), !this.isMuteLog) {
-                let t = ["", "==============\ud83d\udce3\u7cfb\u7edf\u901a\u77e5\ud83d\udce3=============="];
-                t.push(e), s && t.push(s), i && t.push(i), console.log(t.join("\n")), this.logs = this.logs.concat(t)
-            }
-        }
-        log(...t) { t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(t.join(this.logSeparator)) }
-        logErr(t, e) {
-            const s = !this.isSurge() && !this.isQuanX() && !this.isLoon();
-            s ? this.log("", `\u2757\ufe0f${this.name}, \u9519\u8bef!`, t.stack) : this.log("", `\u2757\ufe0f${this.name}, \u9519\u8bef!`, t)
-        }
-        wait(t) { return new Promise(e => setTimeout(e, t)) }
-        done(t = {}) {
-            const e = (new Date).getTime(),
-                s = (e - this.startTime) / 1e3;
-            this.log("", `\ud83d\udd14${this.name}, \u7ed3\u675f! \ud83d\udd5b ${s} \u79d2`), this.log(), (this.isSurge() || this.isQuanX() || this.isLoon()) && $done(t)
-        }
-    }(t, e)
-}
+function Env(t,e){class s{constructor(t){this.env=t}send(t,e="GET"){t="string"==typeof t?{url:t}:t;let s=this.get;return"POST"===e&&(s=this.post),new Promise((e,i)=>{s.call(this,t,(t,s,r)=>{t?i(t):e(s)})})}get(t){return this.send.call(this.env,t)}post(t){return this.send.call(this.env,t,"POST")}}return new class{constructor(t,e){this.name=t,this.http=new s(this),this.data=null,this.dataFile="box.dat",this.logs=[],this.isMute=!1,this.isNeedRewrite=!1,this.logSeparator="\n",this.startTime=(new Date).getTime(),Object.assign(this,e),this.log("",`\ud83d\udd14${this.name}, \u5f00\u59cb!`)}isNode(){return"undefined"!=typeof module&&!!module.exports}isQuanX(){return"undefined"!=typeof $task}isSurge(){return"undefined"!=typeof $httpClient&&"undefined"==typeof $loon}isLoon(){return"undefined"!=typeof $loon}toObj(t,e=null){try{return JSON.parse(t)}catch{return e}}toStr(t,e=null){try{return JSON.stringify(t)}catch{return e}}getjson(t,e){let s=e;const i=this.getdata(t);if(i)try{s=JSON.parse(this.getdata(t))}catch{}return s}setjson(t,e){try{return this.setdata(JSON.stringify(t),e)}catch{return!1}}getScript(t){return new Promise(e=>{this.get({url:t},(t,s,i)=>e(i))})}runScript(t,e){return new Promise(s=>{let i=this.getdata("@chavy_boxjs_userCfgs.httpapi");i=i?i.replace(/\n/g,"").trim():i;let r=this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout");r=r?1*r:20,r=e&&e.timeout?e.timeout:r;const[o,h]=i.split("@"),a={url:`http://${h}/v1/scripting/evaluate`,body:{script_text:t,mock_type:"cron",timeout:r},headers:{"X-Key":o,Accept:"*/*"}};this.post(a,(t,e,i)=>s(i))}).catch(t=>this.logErr(t))}loaddata(){if(!this.isNode())return{};{this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const t=this.path.resolve(this.dataFile),e=this.path.resolve(process.cwd(),this.dataFile),s=this.fs.existsSync(t),i=!s&&this.fs.existsSync(e);if(!s&&!i)return{};{const i=s?t:e;try{return JSON.parse(this.fs.readFileSync(i))}catch(t){return{}}}}}writedata(){if(this.isNode()){this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const t=this.path.resolve(this.dataFile),e=this.path.resolve(process.cwd(),this.dataFile),s=this.fs.existsSync(t),i=!s&&this.fs.existsSync(e),r=JSON.stringify(this.data);s?this.fs.writeFileSync(t,r):i?this.fs.writeFileSync(e,r):this.fs.writeFileSync(t,r)}}lodash_get(t,e,s){const i=e.replace(/\[(\d+)\]/g,".$1").split(".");let r=t;for(const t of i)if(r=Object(r)[t],void 0===r)return s;return r}lodash_set(t,e,s){return Object(t)!==t?t:(Array.isArray(e)||(e=e.toString().match(/[^.[\]]+/g)||[]),e.slice(0,-1).reduce((t,s,i)=>Object(t[s])===t[s]?t[s]:t[s]=Math.abs(e[i+1])>>0==+e[i+1]?[]:{},t)[e[e.length-1]]=s,t)}getdata(t){let e=this.getval(t);if(/^@/.test(t)){const[,s,i]=/^@(.*?)\.(.*?)$/.exec(t),r=s?this.getval(s):"";if(r)try{const t=JSON.parse(r);e=t?this.lodash_get(t,i,""):e}catch(t){e=""}}return e}setdata(t,e){let s=!1;if(/^@/.test(e)){const[,i,r]=/^@(.*?)\.(.*?)$/.exec(e),o=this.getval(i),h=i?"null"===o?null:o||"{}":"{}";try{const e=JSON.parse(h);this.lodash_set(e,r,t),s=this.setval(JSON.stringify(e),i)}catch(e){const o={};this.lodash_set(o,r,t),s=this.setval(JSON.stringify(o),i)}}else s=this.setval(t,e);return s}getval(t){return this.isSurge()||this.isLoon()?$persistentStore.read(t):this.isQuanX()?$prefs.valueForKey(t):this.isNode()?(this.data=this.loaddata(),this.data[t]):this.data&&this.data[t]||null}setval(t,e){return this.isSurge()||this.isLoon()?$persistentStore.write(t,e):this.isQuanX()?$prefs.setValueForKey(t,e):this.isNode()?(this.data=this.loaddata(),this.data[e]=t,this.writedata(),!0):this.data&&this.data[e]||null}initGotEnv(t){this.got=this.got?this.got:require("got"),this.cktough=this.cktough?this.cktough:require("tough-cookie"),this.ckjar=this.ckjar?this.ckjar:new this.cktough.CookieJar,t&&(t.headers=t.headers?t.headers:{},void 0===t.headers.Cookie&&void 0===t.cookieJar&&(t.cookieJar=this.ckjar))}get(t,e=(()=>{})){t.headers&&(delete t.headers["Content-Type"],delete t.headers["Content-Length"]),this.isSurge()||this.isLoon()?(this.isSurge()&&this.isNeedRewrite&&(t.headers=t.headers||{},Object.assign(t.headers,{"X-Surge-Skip-Scripting":!1})),$httpClient.get(t,(t,s,i)=>{!t&&s&&(s.body=i,s.statusCode=s.status),e(t,s,i)})):this.isQuanX()?(this.isNeedRewrite&&(t.opts=t.opts||{},Object.assign(t.opts,{hints:!1})),$task.fetch(t).then(t=>{const{statusCode:s,statusCode:i,headers:r,body:o}=t;e(null,{status:s,statusCode:i,headers:r,body:o},o)},t=>e(t))):this.isNode()&&(this.initGotEnv(t),this.got(t).on("redirect",(t,e)=>{try{if(t.headers["set-cookie"]){const s=t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString();s&&this.ckjar.setCookieSync(s,null),e.cookieJar=this.ckjar}}catch(t){this.logErr(t)}}).then(t=>{const{statusCode:s,statusCode:i,headers:r,body:o}=t;e(null,{status:s,statusCode:i,headers:r,body:o},o)},t=>{const{message:s,response:i}=t;e(s,i,i&&i.body)}))}post(t,e=(()=>{})){if(t.body&&t.headers&&!t.headers["Content-Type"]&&(t.headers["Content-Type"]="application/x-www-form-urlencoded"),t.headers&&delete t.headers["Content-Length"],this.isSurge()||this.isLoon())this.isSurge()&&this.isNeedRewrite&&(t.headers=t.headers||{},Object.assign(t.headers,{"X-Surge-Skip-Scripting":!1})),$httpClient.post(t,(t,s,i)=>{!t&&s&&(s.body=i,s.statusCode=s.status),e(t,s,i)});else if(this.isQuanX())t.method="POST",this.isNeedRewrite&&(t.opts=t.opts||{},Object.assign(t.opts,{hints:!1})),$task.fetch(t).then(t=>{const{statusCode:s,statusCode:i,headers:r,body:o}=t;e(null,{status:s,statusCode:i,headers:r,body:o},o)},t=>e(t));else if(this.isNode()){this.initGotEnv(t);const{url:s,...i}=t;this.got.post(s,i).then(t=>{const{statusCode:s,statusCode:i,headers:r,body:o}=t;e(null,{status:s,statusCode:i,headers:r,body:o},o)},t=>{const{message:s,response:i}=t;e(s,i,i&&i.body)})}}time(t){let e={"M+":(new Date).getMonth()+1,"d+":(new Date).getDate(),"H+":(new Date).getHours(),"m+":(new Date).getMinutes(),"s+":(new Date).getSeconds(),"q+":Math.floor(((new Date).getMonth()+3)/3),S:(new Date).getMilliseconds()};/(y+)/.test(t)&&(t=t.replace(RegExp.$1,((new Date).getFullYear()+"").substr(4-RegExp.$1.length)));for(let s in e)new RegExp("("+s+")").test(t)&&(t=t.replace(RegExp.$1,1==RegExp.$1.length?e[s]:("00"+e[s]).substr((""+e[s]).length)));return t}msg(e=t,s="",i="",r){const o=t=>{if(!t)return t;if("string"==typeof t)return this.isLoon()?t:this.isQuanX()?{"open-url":t}:this.isSurge()?{url:t}:void 0;if("object"==typeof t){if(this.isLoon()){let e=t.openUrl||t.url||t["open-url"],s=t.mediaUrl||t["media-url"];return{openUrl:e,mediaUrl:s}}if(this.isQuanX()){let e=t["open-url"]||t.url||t.openUrl,s=t["media-url"]||t.mediaUrl;return{"open-url":e,"media-url":s}}if(this.isSurge()){let e=t.url||t.openUrl||t["open-url"];return{url:e}}}};if(this.isMute||(this.isSurge()||this.isLoon()?$notification.post(e,s,i,o(r)):this.isQuanX()&&$notify(e,s,i,o(r))),!this.isMuteLog){let t=["","==============\ud83d\udce3\u7cfb\u7edf\u901a\u77e5\ud83d\udce3=============="];t.push(e),s&&t.push(s),i&&t.push(i),console.log(t.join("\n")),this.logs=this.logs.concat(t)}}log(...t){t.length>0&&(this.logs=[...this.logs,...t]),console.log(t.join(this.logSeparator))}logErr(t,e){const s=!this.isSurge()&&!this.isQuanX()&&!this.isLoon();s?this.log("",`\u2757\ufe0f${this.name}, \u9519\u8bef!`,t.stack):this.log("",`\u2757\ufe0f${this.name}, \u9519\u8bef!`,t)}wait(t){return new Promise(e=>setTimeout(e,t))}done(t={}){const e=(new Date).getTime(),s=(e-this.startTime)/1e3;this.log("",`\ud83d\udd14${this.name}, \u7ed3\u675f! \ud83d\udd5b ${s} \u79d2`),this.log(),(this.isSurge()||this.isQuanX()||this.isLoon())&&$done(t)}}(t,e)}

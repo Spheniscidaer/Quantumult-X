@@ -58,8 +58,8 @@ const JD_API_HOST = 'https://api.m.jd.com/client.action';
             $.errorMsg = '';
             $.index = i + 1;
             await getHomeData();
-            console.log('互助码:' + $.homeData.data.result.taskVos[5].assistTaskDetailVo.taskToken);
-            await share();
+            //console.log('互助码:' + $.homeData.data.result.taskVos[5].assistTaskDetailVo.taskToken);
+            //await share();
             await meet();
             await meet2();
             await shop();
@@ -103,13 +103,13 @@ async function meet() {
     const taskToken = $.homeData.data.result.taskVos[0].shoppingActivityVos[0].taskToken;
     const taskId = $.homeData.data.result.taskVos[0].taskId;
     const body = `"appId":"1EFRTwA","taskToken":"${taskToken}","taskId":${taskId},"actionType":1`
-    $.meetInfo = await request(functionId, body)
-    console.log($.meetInfo.data.bizMsg);
+    await request(functionId, body);
+    await sleep(5000);
+    await finish(functionId, taskId, taskToken);
 }
 
 // 逛金榜
 async function meet2() {
-    console.log('开始逛金榜');
     for (i = 0; i < $.homeData.data.result.taskVos[1].shoppingActivityVos.length; i++) {
         console.log($.homeData.data.result.taskVos[1].shoppingActivityVos[i].title);
         const functionId = `harmony_collectScore`;
@@ -125,7 +125,6 @@ async function meet2() {
 
 // 逛入榜商品
 async function shop() {
-    console.log('开始逛京东入榜商品');
     for (i = 0; i < $.homeData.data.result.taskVos[2].productInfoVos.length; i++) {
         console.log($.homeData.data.result.taskVos[2].productInfoVos[i].skuName);
         const functionId = `harmony_collectScore`;
@@ -141,7 +140,6 @@ async function shop() {
 
 // 浏览3
 async function meet3() {
-    console.log('开始逛京东入榜商品');
     for (var i = 0; i < $.homeData.data.result.taskVos[3].shoppingActivityVos.length; i++) {
         console.log($.homeData.data.result.taskVos[3].shoppingActivityVos[i].title);
         const functionId = `harmony_collectScore`;
@@ -157,7 +155,6 @@ async function meet3() {
 
 // 浏览4
 async function meet4() {
-    console.log('开始逛京东入榜商品');
     for (var i = 0; i < $.homeData.data.result.taskVos[4].shoppingActivityVos.length; i++) {
         console.log($.homeData.data.result.taskVos[4].shoppingActivityVos[i].title);
         const functionId = `harmony_collectScore`;
@@ -177,7 +174,7 @@ async function openRedpacket() {
         const functionId = `splitHongbao_getLotteryResult`;
         const body = `"appId":"1EFRTwA","taskId":${i}`
         $.openinfo = await request(functionId, body);
-        console.log($.openinfo.data.result.userAwardsCacheDto.name);
+        console.log($.openinfo.data.result);
         total = total + $.openinfo.data.result.userAwardsCacheDto.value;
         await sleep(1000);
     }

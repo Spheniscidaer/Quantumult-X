@@ -37,7 +37,12 @@ if ($.isNode()) {
     })
     if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => {};
 } else {
-    cookiesArr.push(...[$.getdata('CookieJD'), $.getdata('CookieJD2')]);
+    let cookiesData = $.getdata('CookiesJD') || "[]";
+    cookiesData = jsonParse(cookiesData);
+    cookiesArr = cookiesData.map(item => item.cookie);
+    cookiesArr.reverse();
+    cookiesArr.push(...[$.getdata('CookieJD2'), $.getdata('CookieJD')]);
+    cookiesArr.reverse();
 }
 const JD_API_HOST = 'https://api.m.jd.com/api';
 !(async() => {
@@ -107,6 +112,7 @@ function getRedRain() {
                             let act = data.data.iconArea.filter(vo => vo['type'] === "platform_red_packege_rain")[0]
                             let url = act.data.activityUrl
                             $.activityId = url.substr(url.indexOf("id=") + 3)
+                            console.log($.activityId)
                             $.startTime = act.startTime
                             $.endTime = act.endTime
                             console.log(`下一场红包雨开始时间：${new Date(act.startTime)}`)
@@ -161,7 +167,7 @@ function receiveRedRain() {
 function taskPostUrl(function_id, body = {}) {
     return {
         url: `https://api.m.jd.com/client.action?functionId=${function_id}`,
-        body: 'area=12_904_908_57903&body=%7B%22liveId%22%3A%222956873%22%7D&build=167408&client=apple&clientVersion=9.2.0&d_brand=apple&d_model=iPhone10%2C2&eid=eidIF3CF0112RTIyQTVGQTEtRDVCQy00Qg%3D%3D6HAJa9%2B/4Vedgo62xKQRoAb47%2Bpyu1EQs/6971aUvk0BQAsZLyQAYeid%2BPgbJ9BQoY1RFtkLCLP5OMqU&isBackground=N&openudid=53f4d9c70c1c81f1c8769d2fe2fef0190a3f60d2&osVersion=14.2&partner=TF&rfs=0000&scope=01&screen=1242%2A2208&sign=4fefb7b802a8b1d7ae4529ec32b0bda8&st=1607470636080&sv=121&uts=0f31TVRjBSvNs/AdsIxcW3vOKTLS9m1Bkfr/wtDAnp1q%2BaUi8exzmBNoKgjayIUv6x2Kyf6ccTzo3NpoIr0XxE05GZbP8oOh2s6rmFPTTjPhnIs%2BkxDNq6jbLa/OXerurB%2BctY3Sg9OWaR6%2BnF4XsNtDZrNmKU57jtBoJWI8O2D/lA%2B%2B7sFMhxC%2BxMi9yfyM%2BT%2Bu5DbTBDJCOR1QUIScQw%3D%3D&uuid=hjudwgohxzVu96krv/T6Hg%3D%3D',
+        body: 'area=12_904_908_57903&body=%7B%22liveId%22%3A%223008955%22%7D&build=167454&client=apple&clientVersion=9.3.0&d_brand=apple&d_model=iPhone10%2C2&eid=eidIF3CF0112RTIyQTVGQTEtRDVCQy00Qg%3D%3D6HAJa9%2B/4Vedgo62xKQRoAb47%2Bpyu1EQs/6971aUvk0BQAsZLyQAYeid%2BPgbJ9BQoY1RFtkLCLP5OMqU&isBackground=N&joycious=194&lang=zh_CN&networkType=wifi&networklibtype=JDNetworkBaseAF&openudid=53f4d9c70c1c81f1c8769d2fe2fef0190a3f60d2&osVersion=14.2&partner=apple&rfs=0000&scope=01&screen=1242%2A2208&sign=84a8772e9514dbb656a9380a6aebe89f&st=1607702502921&sv=100&uts=0f31TVRjBSvsWkFfTKQ4BP2gCulJKdkkzdua/T3WharHW3uKzIyZUGDGVuaLMDsU1giMbDTZJekY7lE5Qrru6H7a3I8CGFQ%2Br5QYZwgXCHBigChRD//oGdcd4WB0sfq6bWBzI8FjqbHJffT0ttGiNEy6zqimtHZUV9DD6tpJTTC%2BZrtSFC17giE/EByWeNUEOw0jYdGaJ27M9I7O2U7oXw%3D%3D&uuid=hjudwgohxzVu96krv/T6Hg%3D%3D&wifiBssid=null',
         headers: {
             'Host': 'api.m.jd.com',
             'content-type': 'application/x-www-form-urlencoded',
@@ -243,6 +249,17 @@ function safeGet(data) {
     }
 }
 
+function jsonParse(str) {
+    if (typeof str == "string") {
+        try {
+            return JSON.parse(str);
+        } catch (e) {
+            console.log(e);
+            $.msg($.name, '', '不要在BoxJS手动复制粘贴修改cookie')
+            return [];
+        }
+    }
+}
 // prettier-ignore
 function Env(t, e) { class s { constructor(t) { this.env = t }
         send(t, e = "GET") { t = "string" == typeof t ? { url: t } : t; let s = this.get; return "POST" === e && (s = this.post), new Promise((e, i) => { s.call(this, t, (t, s, r) => { t ? i(t) : e(s) }) }) }

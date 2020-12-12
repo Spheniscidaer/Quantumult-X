@@ -31,8 +31,12 @@ if ($.isNode()) {
     })
     if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => {};
 } else {
-    cookiesArr.push($.getdata('CookieJD'));
-    cookiesArr.push($.getdata('CookieJD2'));
+    let cookiesData = $.getdata('CookiesJD') || "[]";
+    cookiesData = jsonParse(cookiesData);
+    cookiesArr = cookiesData.map(item => item.cookie);
+    cookiesArr.reverse();
+    cookiesArr.push(...[$.getdata('CookieJD2'), $.getdata('CookieJD')]);
+    cookiesArr.reverse();
 }
 let jdNotify = true; //是否开启静默运行。默认true开启
 let message = '',
@@ -518,6 +522,18 @@ function TotalBean() {
             }
         })
     })
+}
+
+function jsonParse(str) {
+    if (typeof str == "string") {
+        try {
+            return JSON.parse(str);
+        } catch (e) {
+            console.log(e);
+            $.msg($.name, '', '不要在BoxJS手动复制粘贴修改cookie')
+            return [];
+        }
+    }
 }
 // prettier-ignore
 function Env(t, e) { class s { constructor(t) { this.env = t }

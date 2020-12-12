@@ -72,7 +72,9 @@ if ($.isNode()) {
     let cookiesData = $.getdata('CookiesJD') || "[]";
     cookiesData = jsonParse(cookiesData);
     cookiesArr = cookiesData.map(item => item.cookie);
-    cookiesArr.push(...[$.getdata('CookieJD'), $.getdata('CookieJD2')]);
+    cookiesArr.reverse();
+    cookiesArr.push(...[$.getdata('CookieJD2'), $.getdata('CookieJD')]);
+    cookiesArr.reverse();
     if ($.getdata('jd_joy_invite_pin')) {
         invite_pins = [];
         invite_pins.push($.getdata('jd_joy_invite_pin'));
@@ -152,11 +154,41 @@ async function getToken() {
         $.done()
     }
 }
+
+function readToken() {
+    return new Promise(resolve => {
+        $.get({ url: `http://api.turinglabs.net/api/v1/jd/joy/read/1/` }, (err, resp, data) => {
+            try {
+                if (err) {
+                    console.log(`${JSON.stringify(err)}`)
+                    console.log(`${$.name} API请求失败，请检查网路重试`)
+                } else {
+                    if (data) {
+                        console.log(data)
+                        data = JSON.parse(data);
+                    }
+                }
+            } catch (e) {
+                $.logErr(e, resp)
+            } finally {
+                resolve(data);
+            }
+        })
+    })
+}
 async function main() {
     if (!cookiesArr[0]) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/', { "open-url": "https://bean.m.jd.com/" });
         return;
     }
+    const readTokenRes = await readToken();
+    if (readTokenRes && readTokenRes.code === 200) {
+        $.LKYLToken = readTokenRes.data[0] || $.getdata('jdJoyRunToken');
+    } else {
+        $.LKYLToken = $.getdata('jdJoyRunToken');
+    }
+    // $.LKYLToken = $.getdata('jdJoyRunToken');
+    console.log(`打印token \n${$.LKYLToken}\n`)
     if (!$.LKYLToken) {
         $.msg($.name, '【提示】请先获取来客有礼宠汪汪token', "微信搜索'来客有礼'小程序\n点击底部的'发现'Tab\n即可获取Token");
         return;

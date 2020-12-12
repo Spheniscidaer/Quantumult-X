@@ -33,8 +33,12 @@ if ($.isNode()) {
     })
     if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => {};
 } else {
-    cookiesArr.push($.getdata('CookieJD'));
-    cookiesArr.push($.getdata('CookieJD2'));
+    let cookiesData = $.getdata('CookiesJD') || "[]";
+    cookiesData = jsonParse(cookiesData);
+    cookiesArr = cookiesData.map(item => item.cookie);
+    cookiesArr.reverse();
+    cookiesArr.push(...[$.getdata('CookieJD2'), $.getdata('CookieJD')]);
+    cookiesArr.reverse();
 }
 let message = '',
     subTitle = '';
@@ -133,12 +137,12 @@ async function joinTwoPeopleRun() {
         joyRunFlag = process.env.JOY_RUN_FLAG;
     }
     if (`${joyRunFlag}` === 'true') {
-        console.log(`\n===========以下是双人赛跑信息========\n`)
+        teamLevel = $.isNode() ? (process.env.JOY_TEAM_LEVEL ? process.env.JOY_TEAM_LEVEL : teamLevel) : ($.getdata('JOY_TEAM_LEVEL') ? $.getdata('JOY_TEAM_LEVEL') : teamLevel);
+        console.log(`\n===========以下是${teamLevel}人赛跑信息========\n`)
         await getPetRace();
         if ($.petRaceResult) {
-            teamLevel = $.isNode() ? (process.env.JOY_TEAM_LEVEL ? process.env.JOY_TEAM_LEVEL : teamLevel) : ($.getdata('JOY_TEAM_LEVEL') ? $.getdata('JOY_TEAM_LEVEL') : teamLevel);
             let petRaceResult = $.petRaceResult.data.petRaceResult;
-            let raceUsers = $.petRaceResult.data.raceUsers;
+            // let raceUsers = $.petRaceResult.data.raceUsers;
             console.log(`赛跑状态：${petRaceResult}\n`);
             if (petRaceResult === 'not_participate') {
                 console.log(`暂未参赛，现在为您参加${teamLevel}人赛跑`);
@@ -148,7 +152,8 @@ async function joinTwoPeopleRun() {
                     message += `${teamLevel}人赛跑：成功参加\n`;
                     await getPetRace();
                     petRaceResult = $.petRaceResult.data.petRaceResult;
-                    raceUsers = $.petRaceResult.data.raceUsers;
+                    await getRankList();
+                    // raceUsers = $.petRaceResult.data.raceUsers;
                     // console.log(`参赛后的状态：${petRaceResult}`)
                     console.log(`双人赛跑助力请自己手动去邀请好友，脚本不带赛跑助力功能\n`);
                 }
@@ -174,25 +179,26 @@ async function joinTwoPeopleRun() {
                 }
             }
             if (petRaceResult === 'participate') {
-                if (raceUsers) {
-                    for (let index = 0; index < raceUsers.length; index++) {
-                        if (raceUsers[index].myself) {
-                            console.log(`您当前里程：${raceUsers[index].distance}KM\n`);
-                            message += `您当前里程：${raceUsers[index].distance}km\n`;
+                await getRankList();
+                if ($.raceUsers && $.raceUsers.length > 0) {
+                    for (let index = 0; index < $.raceUsers.length; index++) {
+                        if (index === 0) {
+                            console.log(`您当前里程：${$.raceUsers[index].distance}KM\n当前排名:第${$.raceUsers[index].rank}名\n将获得积分:${$.raceUsers[index].coin}\n`);
+                            // message += `您当前里程：${$.raceUsers[index].distance}km\n`;
                         } else {
-                            console.log(`对手当前里程：${raceUsers[index].distance}KM\n`);
-                            message += `对手当前里程：${raceUsers[index].distance}km\n`;
+                            console.log(`对手当前里程：${$.raceUsers[index].distance}KM`);
+                            // message += `对手当前里程：${$.raceUsers[index].distance}km\n`;
                         }
                     }
                 }
-                console.log('今日已参赛，下面显示应援团信息\n');
+                console.log('\n今日已参赛，下面显示应援团信息');
                 await getBackupInfo();
                 if ($.getBackupInfoResult.success) {
                     const { currentNickName, totalMembers, totalDistance, backupList } = $.getBackupInfoResult.data;
                     console.log(`${currentNickName}的应援团信息如下\n团员：${totalMembers}个\n团员助力的里程数：${totalDistance}\n`);
                     if (backupList && backupList.length > 0) {
                         for (let item of backupList) {
-                            console.log(`${item.nickName}为您助力${item.distance}km\n`);
+                            console.log(`${item.nickName}为您助力${item.distance}km`);
                         }
                     } else {
                         console.log(`暂无好友为您助力赛跑，如需助力，请手动去邀请好友助力\n`);
@@ -617,6 +623,30 @@ function getPetRace() {
         })
     })
 }
+//查询赛跑排行榜
+function getRankList() {
+    return new Promise(resolve => {
+        const url = `${JD_API_HOST}/combat/getRankList`;
+        $.raceUsers = [];
+        $.get(taskUrl(url, `jdjoy.jd.com`, 'h5'), (err, resp, data) => {
+            try {
+                if (err) {
+                    console.log('\n京东宠汪汪: API查询请求失败 ‼️‼️')
+                } else {
+                    // console.log('查询赛跑信息API',(data))
+                    data = JSON.parse(data);
+                    if (data.success) {
+                        $.raceUsers = data.datas;
+                    }
+                }
+            } catch (e) {
+                $.logErr(e, resp);
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
 //参加赛跑API
 function runMatch(teamLevel, timeout = 5000) {
     if (teamLevel === 10 || teamLevel === 50) timeout = 60000;
@@ -793,6 +823,18 @@ function taskPostUrl(url, body, reqSource, Host, ContentType) {
             'Referer': 'https://jdjoy.jd.com/pet/index',
             'Accept-Language': 'zh-cn',
             'Accept-Encoding': 'gzip, deflate, br',
+        }
+    }
+}
+
+function jsonParse(str) {
+    if (typeof str == "string") {
+        try {
+            return JSON.parse(str);
+        } catch (e) {
+            console.log(e);
+            $.msg($.name, '', '不要在BoxJS手动复制粘贴修改cookie')
+            return [];
         }
     }
 }

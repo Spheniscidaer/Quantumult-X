@@ -30,8 +30,12 @@ if ($.isNode()) {
     })
     if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => {};
 } else {
-    cookiesArr.push($.getdata('CookieJD'));
-    cookiesArr.push($.getdata('CookieJD2'));
+    let cookiesData = $.getdata('CookiesJD') || "[]";
+    cookiesData = jsonParse(cookiesData);
+    cookiesArr = cookiesData.map(item => item.cookie);
+    cookiesArr.reverse();
+    cookiesArr.push(...[$.getdata('CookieJD2'), $.getdata('CookieJD')]);
+    cookiesArr.reverse();
 }
 const jdNotify = $.getdata('jdUnsubscribeNotify'); //是否关闭通知，false打开通知推送，true关闭通知推送
 let goodPageSize = $.getdata('jdUnsubscribePageSize') || 20; // 运行一次取消多少个已关注的商品。数字0表示不取关任何商品
@@ -340,6 +344,18 @@ function requireConfig() {
         }
         resolve()
     })
+}
+
+function jsonParse(str) {
+    if (typeof str == "string") {
+        try {
+            return JSON.parse(str);
+        } catch (e) {
+            console.log(e);
+            $.msg($.name, '', '不要在BoxJS手动复制粘贴修改cookie')
+            return [];
+        }
+    }
 }
 // prettier-ignore
 function Env(t, e) { class s { constructor(t) { this.env = t }

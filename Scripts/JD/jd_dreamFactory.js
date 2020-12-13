@@ -1018,7 +1018,7 @@ function CreateTuan() {
 }
 async function joinLeaderTuan() {
     await updateTuanIds();
-    if (!$.tuanIdS) await updateTuanIdsCDN();
+    if (!$.tuanIdS) await updateTuanIdsCDN('https://gitee.com/lxk0301/updateTeam/raw/master/jd_updateFactoryTuanId.json');
     if (!$.tuanIdS) await updateTuanIdsCDN('https://cdn.jsdelivr.net/gh/lxk0301/updateTeam@master/jd_updateFactoryTuanId.json');
     for (let tuanId of $.tuanIdS.tuanIds) {
         if (!tuanId) continue
@@ -1213,7 +1213,9 @@ function updateTuanIdsCDN(url = 'https://raw.fastgit.org/lxk0301/updateTeam/mast
                 if (err) {
                     console.log(`${JSON.stringify(err)}`)
                 } else {
-                    $.tuanIdS = JSON.parse(data);
+                    if (safeGet(data)) {
+                        $.tuanIdS = JSON.parse(data);
+                    }
                 }
             } catch (e) {
                 $.logErr(e, resp)
@@ -1322,13 +1324,23 @@ function readShareCode() {
 }
 //格式化助力码
 function shareCodesFormat() {
-    return new Promise(async resolve => {
-        newShareCodes = [];
-        const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
-        newShareCodes = shareCodes[tempIndex].split('@');
-        console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify(newShareCodes)}`)
-        resolve();
-    })
+  return new Promise(async resolve => {
+    // console.log(`第${$.index}个京东账号的助力码:::${$.shareCodesArr[$.index - 1]}`)
+    $.newShareCodes = [];
+    if ($.shareCodesArr[$.index - 1]) {
+      $.newShareCodes = $.shareCodesArr[$.index - 1].split('@');
+    } else {
+      console.log(`由于您第${$.index}个京东账号未提供shareCode,将采纳本脚本自带的助力码\n`)
+      const tempIndex = $.index > inviteCodes.length ? (inviteCodes.length - 1) : ($.index - 1);
+      $.newShareCodes = inviteCodes[tempIndex].split('@');
+    }
+    const readShareCodeRes = await readShareCode();
+    if (readShareCodeRes && readShareCodeRes.code === 200) {
+      $.newShareCodes = [...new Set([...$.newShareCodes, ...(readShareCodeRes.data || [])])];
+    }
+    console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify($.newShareCodes)}`)
+    resolve();
+  })
 }
 function requireConfig() {
   return new Promise(resolve => {

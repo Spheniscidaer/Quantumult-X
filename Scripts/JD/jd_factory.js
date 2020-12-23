@@ -450,7 +450,7 @@ function jdfactory_getTaskDetail() {
                             $.taskVos = data.data.result.taskVos; //任务列表
                             $.taskVos.map(item => {
                                 if (item.taskType === 14) {
-                                    console.log(`\n您的${$.name}好友助力邀请码：${item.assistTaskDetailVo.taskToken}\n`)
+                                    console.log(`\n【京东账号${$.index}（${$.nickName || $.UserName}）的${$.name}好友互助码】${item.assistTaskDetailVo.taskToken}\n`)
                                 }
                             })
                         }
@@ -728,7 +728,7 @@ function jsonParse(str) {
             return JSON.parse(str);
         } catch (e) {
             console.log(e);
-            $.msg($.name, '', '不要在BoxJS手动复制粘贴修改cookie')
+            $.msg($.name, '', '请勿随意在BoxJs输入框修改内容\n建议通过脚本去获取cookie')
             return [];
         }
     }

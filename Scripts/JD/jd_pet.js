@@ -66,8 +66,6 @@ let randomCount = $.isNode() ? 20 : 5;
 
                 if ($.isNode()) {
                     await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
-                } else {
-                    $.setdata('', `CookieJD${i ? i + 1 : "" }`); //cookie失效，故清空cookie。$.setdata('', `CookieJD${i ? i + 1 : "" }`);//cookie失效，故清空cookie。
                 }
                 continue
             }
@@ -448,6 +446,7 @@ function shareCodesFormat() {
         newShareCodes = [];
         const tempIndex = $.index > shareCodes.length ? (shareCodes.length - 1) : ($.index - 1);
         newShareCodes = shareCodes[tempIndex].split('@');
+        console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify(newShareCodes)}`)
         resolve();
     })
 }

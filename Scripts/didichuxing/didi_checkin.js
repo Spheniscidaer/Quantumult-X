@@ -38,7 +38,7 @@ Quantumult X:
 [rewrite_local]
 # APP
 ^https:\/\/as\.xiaojukeji\.com\/ep\/as\/toggles\? url script-request-header https://raw.githubusercontent.com/zZPiglet/Task/master/DiDi/DiDi_new.js
-# WeChat-MiniApp
+# MiniApp
 ^https:\/\/common\.diditaxi\.com\.cn\/webapp\/config\/sidebar\? url script-request-header https://raw.githubusercontent.com/zZPiglet/Task/master/DiDi/DiDi_new.js
 
 Surge:
@@ -102,7 +102,7 @@ if ($.isRequest) {
     getToken();
     $.done({});
 } else {
-    !(async() => {
+    !(async () => {
         $.Ticket = $.read("#DiDi");
         $.city = $.read("#DiDi_city");
         $.now = new Date().getTime();
@@ -113,7 +113,7 @@ if ($.isRequest) {
                 $.pmids = isJSON($.read("actIdPM"));
                 if ($.pmids && $.pmids.length) {
                     await Promise.all(
-                        $.pmids.map(async(id) => {
+                        $.pmids.map(async (id) => {
                             await grabCoupons(id);
                         })
                     );
@@ -126,23 +126,23 @@ if ($.isRequest) {
                 }
             } else {
                 /*
-			else if ($.now >= NINE_O_CLOCK_AM - 2 * 1000 && $.now <= NINE_O_CLOCK_AM + 60 * 1000) {
-				$.amids = isJSON($.read("actIdAM"));
-				if ($.amids && $.amids.length) {
-					await Promise.all(
-						$.amids.map(async (id) => {
-							await grabCoupons(id);
-						})
-					);
-					await $.info("滴滴出行\n" + $.subTitle + "\n" + $.detail);
-					await $.notify("滴滴出行 🚕", $.subTitle, $.detail);
-				}
-				await getIds();
-				if ($.activity_instance_id && Math.random() < $.probability) {
-					await instance();
-				}
-			}
-			*/
+            else if ($.now >= NINE_O_CLOCK_AM - 2 * 1000 && $.now <= NINE_O_CLOCK_AM + 60 * 1000) {
+                $.amids = isJSON($.read("actIdAM"));
+                if ($.amids && $.amids.length) {
+                    await Promise.all(
+                        $.amids.map(async (id) => {
+                            await grabCoupons(id);
+                        })
+                    );
+                    await $.info("滴滴出行\n" + $.subTitle + "\n" + $.detail);
+                    await $.notify("滴滴出行 🚕", $.subTitle, $.detail);
+                }
+                await getIds();
+                if ($.activity_instance_id && Math.random() < $.probability) {
+                    await instance();
+                }
+            }
+            */
                 if (aff) await getIds();
                 $.checkinParams = "&city_id=" + $.city;
                 if ($.source_id) {
@@ -152,9 +152,10 @@ if ($.isRequest) {
                 }
                 await checkin();
                 await storeActId();
+                await reward();
                 if ($.drawlids) {
                     await Promise.all(
-                        $.drawlids.map(async(lid) => {
+                        $.drawlids.map(async (lid) => {
                             $.times[lid] = 1;
                             while ($.times[lid]) {
                                 await draw(lid);
@@ -165,7 +166,7 @@ if ($.isRequest) {
                 }
                 if ($.isExpenddrawlids && $.expenddrawlids) {
                     await Promise.all(
-                        $.expenddrawlids.map(async(lid) => {
+                        $.expenddrawlids.map(async (lid) => {
                             $.times[lid] = 1;
                             while ($.times[lid]) {
                                 await draw(lid);
@@ -174,7 +175,6 @@ if ($.isRequest) {
                         })
                     );
                 }
-                await reward();
                 await pointCollect();
                 await pointSign();
                 await pointInfo();
@@ -208,7 +208,7 @@ if ($.isRequest) {
             }
         }
     })()
-    .catch((err) => {
+        .catch((err) => {
             if (err instanceof ERR.TokenError) {
                 $.notify("滴滴出行 - Token 错误", "", err.message, "OneTravel://");
             } else if (err instanceof ERR.BodyError) {
@@ -232,8 +232,8 @@ function Choose(v) {
 
 function getIds() {
     return $.get({
-            url: "https://api.github.com/gists/a9a537190bc6353923191520cf9a2c89",
-        })
+        url: "https://api.github.com/gists/a9a537190bc6353923191520cf9a2c89",
+    })
         .then((resp) => {
             $.log("getIds: " + JSON.stringify(resp.body));
             let gistobj = JSON.parse(resp.body);
@@ -258,11 +258,11 @@ function getIds() {
 
 function checkin() {
     return $.get({
-            url: mainURL + "/wechat/benefit/public/index?" + $.checkinParams,
-            headers: {
-                "Didi-Ticket": $.Ticket,
-            },
-        })
+        url: mainURL + "/wechat/benefit/public/index?" + $.checkinParams,
+        headers: {
+            "Didi-Ticket": $.Ticket,
+        },
+    })
         .delay(500)
         .then((resp) => {
             if (resp.statusCode == 403) {
@@ -307,19 +307,20 @@ function checkin() {
 
 function storeActId() {
     return $.get({
-            url: mainURL +
-                "/wechat/benefit/public/v2/index?%7B%22resource_name%22:%22welfare_through_train_calendar%22%7D" +
-                $.checkinParams,
-            headers: {
-                "Didi-Ticket": $.Ticket,
-            },
-        })
+        url:
+            mainURL +
+            "/wechat/benefit/public/v2/index?%7B%22resource_name%22:%22welfare_through_train_calendar%22%7D" +
+            $.checkinParams,
+        headers: {
+            "Didi-Ticket": $.Ticket,
+        },
+    })
         .then((resp) => {
             $.log("storeActId: " + JSON.stringify(resp.body));
             let obj = isJSON(resp.body);
             $.delete("actIdAM");
             $.delete("actIdPM");
-            if (obj && obj.errno == 0) {
+            if (obj && (obj.errno == 0 || obj.errno == 500)) {
                 let actIdAM = [];
                 let actIdPM = [];
                 for (let a of obj.data.calendar[today]) {
@@ -377,9 +378,9 @@ function storeActId() {
 
 function pointCollect() {
     return $.post({
-            url: pointURL + "/points/collect",
-            body: "app_id=common&token=" + encodeURIComponent($.Ticket),
-        })
+        url: pointURL + "/points/collect",
+        body: "app_id=common&token=" + encodeURIComponent($.Ticket),
+    })
         .then((resp) => {
             $.log("pointCollect: " + JSON.stringify(resp.body));
         })
@@ -404,9 +405,9 @@ async function pointSign() {
 
 function getPointSignURL() {
     return $.post({
-            url: "https://res.xiaojukeji.com/resapi/activity/getMulti",
-            body: "resource_name=dcoin_mall_carousel",
-        })
+        url: "https://res.xiaojukeji.com/resapi/activity/getMulti",
+        body: "resource_name=dcoin_mall_carousel",
+    })
         .then((resp) => {
             $.log("getPointSignURL: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
@@ -425,8 +426,8 @@ function getPointSignURL() {
 
 function prePointSign() {
     return $.get({
-            url: $.realPointSignURL,
-        })
+        url: $.realPointSignURL,
+    })
         .then((resp) => {
             $.log("prePointSign: " + resp.body);
             let resphtml = resp.body;
@@ -448,19 +449,20 @@ function prePointSign() {
 
 function getPointSignDay() {
     return $.get({
-            url: signgiftURL +
-                "/" +
-                $.pointSignActivityId +
-                "/signin?signin_user_token=" +
-                encodeURIComponent($.Ticket),
-        })
+        url:
+            signgiftURL +
+            "/" +
+            $.pointSignActivityId +
+            "/signin?signin_user_token=" +
+            encodeURIComponent($.Ticket),
+    })
         .then((resp) => {
             $.log("getPointSignDay: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
             $.pointSignDay =
-                obj.signins.length + 1 > $.pointSignDayMax ?
-                $.pointSignDayMax :
-                obj.signins.length + 1;
+                obj.signins.length + 1 > $.pointSignDayMax
+                    ? $.pointSignDayMax
+                    : obj.signins.length + 1;
         })
         .catch((err) => {
             throw err;
@@ -469,13 +471,14 @@ function getPointSignDay() {
 
 function doPointSign() {
     return $.post({
-            url: signgiftURL + "/" + $.pointSignActivityId + "/signin",
-            body: '{"signin_day":' +
-                $.pointSignDay +
-                ',"signin_type":0,"signin_user_token":"' +
-                $.Ticket +
-                '"}',
-        })
+        url: signgiftURL + "/" + $.pointSignActivityId + "/signin",
+        body:
+            '{"signin_day":' +
+            $.pointSignDay +
+            ',"signin_type":0,"signin_user_token":"' +
+            $.Ticket +
+            '"}',
+    })
         .then((resp) => {
             $.log("doPointSign: " + JSON.stringify(resp.body));
             $.canRewardPointSign = true;
@@ -487,15 +490,16 @@ function doPointSign() {
 
 function rewardPointSign() {
     return $.post({
-            url: signgiftURL + "/" + $.pointSignActivityId + "/reward_lottery",
-            body: '{"user_token":"' +
-                $.Ticket +
-                '","signin_day":' +
-                $.pointSignDay +
-                ',"lottery_id":"' +
-                $.signPointIds[$.pointSignDay - 1].prize_id +
-                '"}',
-        })
+        url: signgiftURL + "/" + $.pointSignActivityId + "/reward_lottery",
+        body:
+            '{"user_token":"' +
+            $.Ticket +
+            '","signin_day":' +
+            $.pointSignDay +
+            ',"lottery_id":"' +
+            $.signPointIds[$.pointSignDay - 1].prize_id +
+            '"}',
+    })
         .then((resp) => {
             $.log("rewardPointSign: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
@@ -515,8 +519,8 @@ function rewardPointSign() {
 
 function pointInfo() {
     return $.get({
-            url: pointURL + "/user/account?source_id=ckjf_10001&token=" + encodeURIComponent($.Ticket),
-        })
+        url: pointURL + "/user/account?source_id=ckjf_10001&token=" + encodeURIComponent($.Ticket),
+    })
         .then((resp) => {
             $.log("pointInfo: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
@@ -525,9 +529,9 @@ function pointInfo() {
             let expiredate = obj.data.dcoin.expire_date;
             $.detail += "账户共有 " + total + " 积分";
             $.detail +=
-                expiredate && expirepoint ?
-                "，有 " + expirepoint + " 积分将在 " + expiredate + " 过期。" :
-                "。";
+                expiredate && expirepoint
+                    ? "，有 " + expirepoint + " 积分将在 " + expiredate + " 过期。"
+                    : "。";
         })
         .catch((err) => {
             $.error(err);
@@ -543,8 +547,8 @@ async function reward() {
 
 function rewardList() {
     return $.get({
-            url: awardURL + "/pListReward?token=" + encodeURIComponent($.Ticket),
-        })
+        url: awardURL + "/pListReward?token=" + encodeURIComponent($.Ticket),
+    })
         .then((resp) => {
             $.log("rewardList: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
@@ -568,12 +572,13 @@ function rewardList() {
 async function getReward() {
     for (let l of $.rewardList) {
         await $.get({
-                url: awardURL +
-                    "/pGetRewards?order_id=" +
-                    l.oid +
-                    "&token=" +
-                    encodeURIComponent($.Ticket),
-            })
+            url:
+                awardURL +
+                "/pGetRewards?order_id=" +
+                l.oid +
+                "&token=" +
+                encodeURIComponent($.Ticket),
+        })
             .then((resp) => {
                 $.log("reward: " + JSON.stringify(resp.body));
                 let obj = JSON.parse(resp.body);
@@ -595,12 +600,13 @@ async function getReward() {
 
 function draw(lid) {
     return $.get({
-            url: mainURL +
-                "/bosp-api/lottery/draw?lid=" +
-                lid +
-                "&token=" +
-                encodeURIComponent($.Ticket),
-        })
+        url:
+            mainURL +
+            "/bosp-api/lottery/draw?lid=" +
+            lid +
+            "&token=" +
+            encodeURIComponent($.Ticket),
+    })
         .delay(delay)
         .then((resp) => {
             $.log(lid + " draw: " + JSON.stringify(resp.body));
@@ -621,13 +627,14 @@ function draw(lid) {
 
 function share(lid) {
     return $.get({
-            url: mainURL +
-                "/bosp-api/lottery/incrDpubShareParticipateLimit?lid=" +
-                lid +
-                "&token=" +
-                encodeURIComponent($.Ticket) +
-                "&role=1",
-        })
+        url:
+            mainURL +
+            "/bosp-api/lottery/incrDpubShareParticipateLimit?lid=" +
+            lid +
+            "&token=" +
+            encodeURIComponent($.Ticket) +
+            "&role=1",
+    })
         .delay(delay)
         .then((resp) => {
             $.log(lid + " share: " + JSON.stringify(resp.body));
@@ -642,12 +649,12 @@ function share(lid) {
 
 function finance() {
     return $.post({
-            url: financeURL + "/execute",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: '{"token":"' + $.Ticket + '","activityId":"' + $.financeActId + '","clientId":1}',
-        })
+        url: financeURL + "/execute",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: '{"token":"' + $.Ticket + '","activityId":"' + $.financeActId + '","clientId":1}',
+    })
         .then((resp) => {
             $.log("execute: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
@@ -688,12 +695,12 @@ function finance() {
 
 function restartFinace() {
     return $.post({
-            url: financeURL + "/restart",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: '{"token":"' + $.Ticket + '","activityId":"' + $.financeActId + '","clientId":1}',
-        })
+        url: financeURL + "/restart",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: '{"token":"' + $.Ticket + '","activityId":"' + $.financeActId + '","clientId":1}',
+    })
         .then((resp) => {
             $.log("restart: " + JSON.stringify(resp.body));
         })
@@ -715,9 +722,9 @@ async function instance() {
 function joinInstance() {
     $.log($.instancechoose);
     return $.post({
-            url: mainURL + "/toggle/api/instance/join?ticket=" + encodeURIComponent($.Ticket),
-            body: "scene=" + $.instanceScene + "&activity_instance_id=" + $.instancechoose,
-        })
+        url: mainURL + "/toggle/api/instance/join?ticket=" + encodeURIComponent($.Ticket),
+        body: "scene=" + $.instanceScene + "&activity_instance_id=" + $.instancechoose,
+    })
         .then((resp) => {
             $.log("joinInstance: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
@@ -734,15 +741,16 @@ function joinInstance() {
 
 function getInstance() {
     return $.get({
-            url: mainURL +
-                "/toggle/api/instance/getInstanceByInstanceID?scene=" +
-                $.instanceScene +
-                "&activity_instance_id=" +
-                $.instancechoose +
-                "&ticket=" +
-                $.Ticket +
-                "&need_reward=true",
-        })
+        url:
+            mainURL +
+            "/toggle/api/instance/getInstanceByInstanceID?scene=" +
+            $.instanceScene +
+            "&activity_instance_id=" +
+            $.instancechoose +
+            "&ticket=" +
+            $.Ticket +
+            "&need_reward=true",
+    })
         .then((resp) => {
             $.log("getInstance: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
@@ -756,14 +764,15 @@ function getInstance() {
 
 function rewardInstance() {
     return $.get({
-            url: mainURL +
-                "/toggle/api/query/queryAvailableReward?token=" +
-                $.Ticket +
-                "&scene=" +
-                $.instanceScene +
-                "&activity_id=" +
-                $.instance_activity_id,
-        })
+        url:
+            mainURL +
+            "/toggle/api/query/queryAvailableReward?token=" +
+            $.Ticket +
+            "&scene=" +
+            $.instanceScene +
+            "&activity_id=" +
+            $.instance_activity_id,
+    })
         .then((resp) => {
             $.log("rewardInstance: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
@@ -779,13 +788,13 @@ function rewardInstance() {
 
 function grabCoupons(id) {
     return $.post({
-            url: mainURL + "/wechat/soraka/gainAward",
-            headers: {
-                "Content-Type": "application/json",
-                "Didi-Ticket": $.Ticket,
-            },
-            body: '{"app_id":"common","city_id":"' + $.city + '","act_id":"' + id + '"}',
-        })
+        url: mainURL + "/wechat/soraka/gainAward",
+        headers: {
+            "Content-Type": "application/json",
+            "Didi-Ticket": $.Ticket,
+        },
+        body: '{"app_id":"common","city_id":"' + $.city + '","act_id":"' + id + '"}',
+    })
         .then((resp) => {
             $.log("time: " + $.now + "\naward[" + id + "]: " + JSON.stringify(resp.body));
             let obj = JSON.parse(resp.body);
@@ -866,30 +875,7 @@ function MYERR() {
 
 // prettier-ignore
 // isJSON
-function isJSON(t) { if ("string" == typeof t) try { let r = JSON.parse(t); return !("object" != typeof r || !r) && r } catch (t) { return !1 }
-    return !1 }
+function isJSON(t) { if ("string" == typeof t) try { let r = JSON.parse(t); return !("object" != typeof r || !r) && r } catch (t) { return !1 } return !1 }
 // prettier-ignore
 // OpenAPI by Peng-YM, modified by zZPiglet
-function API(s = "untitled", t = !1) { return new class { constructor(s, t) { this.name = s, this.debug = t, this.isRequest = "undefined" != typeof $request, this.isQX = "undefined" != typeof $task, this.isLoon = "undefined" != typeof $loon, this.isSurge = "undefined" != typeof $httpClient && !this.isLoon, this.isNode = "function" == typeof require, this.isJSBox = this.isNode && "undefined" != typeof $jsbox, this.node = (() => { if (this.isNode) { const s = "undefined" != typeof $request ? void 0 : require("request"),
-                        t = require("fs"); return { request: s, fs: t } } return null })(), this.initCache(); const e = (s, t) => new Promise(function(e) { setTimeout(e.bind(null, t), s) });
-            Promise.prototype.delay = function(s) { return this.then(function(t) { return e(s, t) }) } }
-        get(s) { return this.isQX ? ("string" == typeof s && (s = { url: s, method: "GET" }), $task.fetch(s)) : new Promise((t, e) => { this.isLoon || this.isSurge ? $httpClient.get(s, (s, i, o) => { s ? e(s) : t({ statusCode: i.status, headers: i.headers, body: o }) }) : this.node.request(s, (s, i, o) => { s ? e(s) : t({...i, statusCode: i.statusCode, body: o }) }) }) }
-        post(s) { return this.isQX ? ("string" == typeof s && (s = { url: s }), s.method = "POST", $task.fetch(s)) : new Promise((t, e) => { this.isLoon || this.isSurge ? $httpClient.post(s, (s, i, o) => { s ? e(s) : t({ statusCode: i.status, headers: i.headers, body: o }) }) : this.node.request.post(s, (s, i, o) => { s ? e(s) : t({...i, statusCode: i.statusCode, body: o }) }) }) }
-        initCache() { if (this.isQX && (this.cache = JSON.parse($prefs.valueForKey(this.name) || "{}")), (this.isLoon || this.isSurge) && (this.cache = JSON.parse($persistentStore.read(this.name) || "{}")), this.isNode) { let s = "root.json";
-                this.node.fs.existsSync(s) || this.node.fs.writeFileSync(s, JSON.stringify({}), { flag: "wx" }, s => console.log(s)), this.root = {}, s = `${this.name}.json`, this.node.fs.existsSync(s) ? this.cache = JSON.parse(this.node.fs.readFileSync(`${this.name}.json`)) : (this.node.fs.writeFileSync(s, JSON.stringify({}), { flag: "wx" }, s => console.log(s)), this.cache = {}) } }
-        persistCache() { const s = JSON.stringify(this.cache);
-            this.isQX && $prefs.setValueForKey(s, this.name), (this.isLoon || this.isSurge) && $persistentStore.write(s, this.name), this.isNode && (this.node.fs.writeFileSync(`${this.name}.json`, s, { flag: "w" }, s => console.log(s)), this.node.fs.writeFileSync("root.json", JSON.stringify(this.root), { flag: "w" }, s => console.log(s))) }
-        write(s, t) { this.log(`SET ${t}`), -1 !== t.indexOf("#") ? (t = t.substr(1), (this.isSurge || this.isLoon) && $persistentStore.write(s, t), this.isQX && $prefs.setValueForKey(s, t), this.isNode && (this.root[t] = s)) : this.cache[t] = s, this.persistCache() }
-        read(s) { return this.log(`READ ${s}`), -1 === s.indexOf("#") ? this.cache[s] : (s = s.substr(1), this.isSurge || this.isLoon ? $persistentStore.read(s) : this.isQX ? $prefs.valueForKey(s) : this.isNode ? this.root[s] : void 0) }
-        delete(s) { this.log(`DELETE ${s}`), -1 !== s.indexOf("#") ? (s = s.substr(1), (this.isSurge || this.isLoon) && $persistentStore.write(null, s), this.isQX && $prefs.removeValueForKey(s), this.isNode && delete this.root[s]) : delete this.cache[s], this.persistCache() }
-        notify(t = s, e = "", i = "", o, n) { if (this.isSurge) { let s = i + (null == n ? "" : `\n\n多媒体链接：${n}`),
-                    r = {};
-                o && (r.url = o), "{}" == JSON.stringify(r) ? $notification.post(t, e, s) : $notification.post(t, e, s, r) } if (this.isQX) { let s = {};
-                o && (s["open-url"] = o), n && (s["media-url"] = n), "{}" == JSON.stringify(s) ? $notify(t, e, i) : $notify(t, e, i, s) } if (this.isLoon) { let s = {};
-                o && (s.openUrl = o), n && (s.mediaUrl = n), "{}" == JSON.stringify(s) ? $notification.post(t, e, i) : $notification.post(t, e, i, s) } if (this.isNode) { let s = i + (null == o ? "" : `\n\n跳转链接：${o}`) + (null == n ? "" : `\n\n多媒体链接：${n}`); if (this.isJSBox) { const i = require("push");
-                    i.schedule({ title: t, body: e ? e + "\n" + s : s }) } else console.log(`${t}\n${e}\n${s}\n\n`) } }
-        log(s) { this.debug && console.log(s) }
-        info(s) { console.log(s) }
-        error(s) { console.log("ERROR: " + s) }
-        wait(s) { return new Promise(t => setTimeout(t, s)) }
-        done(s = {}) { this.isQX || this.isLoon || this.isSurge ? this.isRequest ? $done(s) : $done() : this.isNode && !this.isJSBox && "undefined" != typeof $context && ($context.headers = s.headers, $context.statusCode = s.statusCode, $context.body = s.body) } }(s, t) }
+function API(s = "untitled", t = !1) { return new class { constructor(s, t) { this.name = s, this.debug = t, this.isRequest = "undefined" != typeof $request, this.isQX = "undefined" != typeof $task, this.isLoon = "undefined" != typeof $loon, this.isSurge = "undefined" != typeof $httpClient && !this.isLoon, this.isNode = "function" == typeof require, this.isJSBox = this.isNode && "undefined" != typeof $jsbox, this.node = (() => { if (this.isNode) { const s = "undefined" != typeof $request ? void 0 : require("request"), t = require("fs"); return { request: s, fs: t } } return null })(), this.initCache(); const e = (s, t) => new Promise(function (e) { setTimeout(e.bind(null, t), s) }); Promise.prototype.delay = function (s) { return this.then(function (t) { return e(s, t) }) } } get(s) { return this.isQX ? ("string" == typeof s && (s = { url: s, method: "GET" }), $task.fetch(s)) : new Promise((t, e) => { this.isLoon || this.isSurge ? $httpClient.get(s, (s, i, o) => { s ? e(s) : t({ statusCode: i.status, headers: i.headers, body: o }) }) : this.node.request(s, (s, i, o) => { s ? e(s) : t({ ...i, statusCode: i.statusCode, body: o }) }) }) } post(s) { return this.isQX ? ("string" == typeof s && (s = { url: s }), s.method = "POST", $task.fetch(s)) : new Promise((t, e) => { this.isLoon || this.isSurge ? $httpClient.post(s, (s, i, o) => { s ? e(s) : t({ statusCode: i.status, headers: i.headers, body: o }) }) : this.node.request.post(s, (s, i, o) => { s ? e(s) : t({ ...i, statusCode: i.statusCode, body: o }) }) }) } initCache() { if (this.isQX && (this.cache = JSON.parse($prefs.valueForKey(this.name) || "{}")), (this.isLoon || this.isSurge) && (this.cache = JSON.parse($persistentStore.read(this.name) || "{}")), this.isNode) { let s = "root.json"; this.node.fs.existsSync(s) || this.node.fs.writeFileSync(s, JSON.stringify({}), { flag: "wx" }, s => console.log(s)), this.root = {}, s = `${this.name}.json`, this.node.fs.existsSync(s) ? this.cache = JSON.parse(this.node.fs.readFileSync(`${this.name}.json`)) : (this.node.fs.writeFileSync(s, JSON.stringify({}), { flag: "wx" }, s => console.log(s)), this.cache = {}) } } persistCache() { const s = JSON.stringify(this.cache); this.isQX && $prefs.setValueForKey(s, this.name), (this.isLoon || this.isSurge) && $persistentStore.write(s, this.name), this.isNode && (this.node.fs.writeFileSync(`${this.name}.json`, s, { flag: "w" }, s => console.log(s)), this.node.fs.writeFileSync("root.json", JSON.stringify(this.root), { flag: "w" }, s => console.log(s))) } write(s, t) { this.log(`SET ${t}`), -1 !== t.indexOf("#") ? (t = t.substr(1), (this.isSurge || this.isLoon) && $persistentStore.write(s, t), this.isQX && $prefs.setValueForKey(s, t), this.isNode && (this.root[t] = s)) : this.cache[t] = s, this.persistCache() } read(s) { return this.log(`READ ${s}`), -1 === s.indexOf("#") ? this.cache[s] : (s = s.substr(1), this.isSurge || this.isLoon ? $persistentStore.read(s) : this.isQX ? $prefs.valueForKey(s) : this.isNode ? this.root[s] : void 0) } delete(s) { this.log(`DELETE ${s}`), -1 !== s.indexOf("#") ? (s = s.substr(1), (this.isSurge || this.isLoon) && $persistentStore.write(null, s), this.isQX && $prefs.removeValueForKey(s), this.isNode && delete this.root[s]) : delete this.cache[s], this.persistCache() } notify(t = s, e = "", i = "", o, n) { if (this.isSurge) { let s = i + (null == n ? "" : `\n\n多媒体链接：${n}`), r = {}; o && (r.url = o), "{}" == JSON.stringify(r) ? $notification.post(t, e, s) : $notification.post(t, e, s, r) } if (this.isQX) { let s = {}; o && (s["open-url"] = o), n && (s["media-url"] = n), "{}" == JSON.stringify(s) ? $notify(t, e, i) : $notify(t, e, i, s) } if (this.isLoon) { let s = {}; o && (s.openUrl = o), n && (s.mediaUrl = n), "{}" == JSON.stringify(s) ? $notification.post(t, e, i) : $notification.post(t, e, i, s) } if (this.isNode) { let s = i + (null == o ? "" : `\n\n跳转链接：${o}`) + (null == n ? "" : `\n\n多媒体链接：${n}`); if (this.isJSBox) { const i = require("push"); i.schedule({ title: t, body: e ? e + "\n" + s : s }) } else console.log(`${t}\n${e}\n${s}\n\n`) } } log(s) { this.debug && console.log(s) } info(s) { console.log(s) } error(s) { console.log("ERROR: " + s) } wait(s) { return new Promise(t => setTimeout(t, s)) } done(s = {}) { this.isQX || this.isLoon || this.isSurge ? this.isRequest ? $done(s) : $done() : this.isNode && !this.isJSBox && "undefined" != typeof $context && ($context.headers = s.headers, $context.statusCode = s.statusCode, $context.body = s.body) } }(s, t) }

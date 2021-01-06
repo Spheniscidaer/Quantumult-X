@@ -3,8 +3,7 @@ const blocked_users_key = 'zhihu_blocked_users';
 const current_userinfo_key = 'zhihu_current_userinfo';
 let magicJS = MagicJS(scriptName, "INFO");
 
-;
-(() => {
+; (() => {
     let body = null;
     if (magicJS.isResponse) {
         switch (true) {
@@ -40,11 +39,12 @@ let magicJS = MagicJS(scriptName, "INFO");
                         let insertText = '<a style="height: 42px;padding: 0 12px;border-radius: 6px;background-color: rgb(74 162 56 / 8%);display: block;text-decoration: none;" href="https://github.com/blackmatrix7/ios_rule_script/blob/master/script/zhihu/README.md#知乎助手"><div style="color: #619201;display: flex;-webkit-box-align: center;align-items: center;height: 100%;"><svg class="icon" style="width: 1.2em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1465"><path d="M512 85.333333c71.477333 0 159.68 57.546667 229.258667 147.018667C817.845333 330.826667 864 455.978667 864 586.666667c0 211.808-148.501333 352-352 352S160 798.474667 160 586.666667c0-130.688 46.144-255.84 122.741333-354.314667C352.32 142.88 440.522667 85.333333 512 85.333333z m0 64c-48.213333 0-120.096 46.912-178.741333 122.314667C265.109333 359.253333 224 470.762667 224 586.666667c0 175.616 119.050667 288 288 288s288-112.384 288-288c0-115.904-41.109333-227.402667-109.258667-315.018667C632.096 196.234667 560.213333 149.333333 512 149.333333z m-74.666667 522.666667a53.333333 53.333333 0 1 1 0 106.666667 53.333333 53.333333 0 0 1 0-106.666667z m-96-128a42.666667 42.666667 0 1 1 0 85.333333 42.666667 42.666667 0 0 1 0-85.333333z" p-id="1466"></path></svg><div style="flex: 1 1;white-space: nowrap;text-overflow: ellipsis;padding-left:4px"><span style="font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif;-webkit-tap-highlight-color: rgba(26,26,26,0);font-size: 14px;line-height: 20px;color: #619201;white-space: nowrap;font-weight: 600;">知乎助手 · 本文为免费内容</span></div><div><span style="font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif;-webkit-tap-highlight-color: rgba(26,26,26,0);font-size: 14px;color: #619201;line-height: normal;display: flex;-webkit-box-align: center;align-items: center;"><svg style="font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif;-webkit-tap-highlight-color: rgba(26,26,26,0);font-size: 14px;color: #619201;line-height: normal;fill: currentcolor;width: 24px;height: 24px;margin: -2px;" fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path d="M9.218 16.78a.737.737 0 0 0 1.052 0l4.512-4.249a.758.758 0 0 0 0-1.063L10.27 7.22a.737.737 0 0 0-1.052 0 .759.759 0 0 0-.001 1.063L13 12l-3.782 3.716a.758.758 0 0 0 0 1.063z" fill-rule="evenodd"></path></svg></span></div></div></a>'
                         body = html.slice(0, start) + insertText + html.slice(start);
                     }
-                } catch (err) {
+                }
+                catch (err) {
                     magicJS.logError(`知乎付费内容提醒出现异常：${err}`);
                 }
                 break;
-                // 获取登录用户信息
+            // 获取登录用户信息
             case /^https:\/\/api\.zhihu\.com\/people\/self/.test(magicJS.request.url):
                 let user_info = { id: 'default', is_vip: false };
                 try {
@@ -56,25 +56,28 @@ let magicJS = MagicJS(scriptName, "INFO");
                             is_vip: obj['vip_info']['is_vip']
                         };
                         magicJS.logDebug(`当前用户id：${obj['id']}，是否为VIP：${obj['vip_info']['is_vip']}`);
-                    } else {
+                    }
+                    else {
                         magicJS.logWarning(`没有获取到当前登录用户信息，已设置为默认用户配置。如果未登录知乎请忽略此日志。`);
                     }
-                } catch (err) {
+                }
+                catch (err) {
                     magicJS.logError(`知乎获取当前用户信息出现异常：${err}`);
                 }
                 magicJS.write(current_userinfo_key, user_info);
                 break;
-                // 去除MCN信息
+            // 去除MCN信息
             case /^https?:\/\/api\.zhihu\.com\/people\/((?!self).)*$/.test(magicJS.request.url):
                 try {
                     let obj = JSON.parse(magicJS.response.body);
                     delete obj['mcn_user_info'];
                     body = JSON.stringify(obj);
-                } catch (err) {
+                }
+                catch (err) {
                     magicJS.logError(`知乎去除MCN信息出现异常：${err}`);
                 }
                 break;
-                // 推荐去广告与黑名单增强
+            // 推荐去广告与黑名单增强
             case /^https:\/\/api\.zhihu\.com\/topstory\/recommend\?/.test(magicJS.request.url):
                 try {
                     let user_info = GetUserInfo();
@@ -83,28 +86,31 @@ let magicJS = MagicJS(scriptName, "INFO");
                     let obj = JSON.parse(magicJS.response.body);
                     let data = obj['data'].filter((element) => {
                         let flag = !(
-                            element['card_type'] === 'slot_event_card' ||
-                            element.hasOwnProperty('ad')
+                            element['card_type'] === 'slot_event_card'
+                            || element.hasOwnProperty('ad')
                             // || element['extra']['type'] === 'drama'
-                            // || element['extra']['type'] === 'zvideo'
+                            // || element['extra']['type'] == 'zvideo'
                         );
-                        if (flag === true &&
-                            custom_blocked_users &&
-                            element['common_card']['feed_content'].hasOwnProperty('source_line') &&
-                            element['common_card']['feed_content']['source_line'].hasOwnProperty('elements') &&
-                            custom_blocked_users[element['common_card']['feed_content']['source_line']['elements'][1]['text']['panel_text']]) {
-                            flag = false;
+                        try {
+                            if (flag === true &&
+                                custom_blocked_users &&
+                                element['common_card']['feed_content'].hasOwnProperty('source_line') &&
+                                element['common_card']['feed_content']['source_line'].hasOwnProperty('elements') &&
+                                custom_blocked_users[element['common_card']['feed_content']['source_line']['elements'][1]['text']['panel_text']]) {
+                                flag = false;
+                            }
                         }
+                        catch (err) { }
                         return flag;
                     });
                     obj['data'] = data;
                     body = JSON.stringify(obj);
-                } catch (err) {
-                    magicJS.notify('推荐去广告出问题了，快去看看日志吧');
+                }
+                catch (err) {
                     magicJS.logError(`知乎推荐列表去广告出现异常：${err}`);
                 }
                 break;
-                // 关注列表去广告
+            // 关注列表去广告
             case /^https?:\/\/api\.zhihu\.com\/moments(\/|\?)?(recommend|action=|feed_type=)(?!\/people)/.test(magicJS.request.url):
                 try {
                     let obj = JSON.parse(magicJS.response.body);
@@ -138,11 +144,12 @@ let magicJS = MagicJS(scriptName, "INFO");
                     }
                     obj['data'] = data;
                     body = JSON.stringify(obj);
-                } catch (err) {
+                }
+                catch (err) {
                     magicJS.logError(`知乎关注列表去广告出现异常：${err}`);
                 }
                 break;
-                // 回答列表去广告及黑名单增强
+            // 回答列表去广告及黑名单增强
             case /^https?:\/\/api\.zhihu\.com\/v4\/questions/.test(magicJS.request.url):
                 try {
                     let user_info = GetUserInfo();
@@ -155,11 +162,12 @@ let magicJS = MagicJS(scriptName, "INFO");
                     let data = obj['data'].filter((element) => { return !custom_blocked_users[element['author']['name']] })
                     obj['data'] = data;
                     body = JSON.stringify(obj);
-                } catch (err) {
+                }
+                catch (err) {
                     magicJS.logError(`知乎回答列表去广告出现异常：${err}`);
                 }
                 break;
-                // 拦截官方账号推广消息
+            // 拦截官方账号推广消息
             case /^https?:\/\/api\.zhihu\.com\/notifications\/v3\/timeline\/entry\/system_message/.test(magicJS.request.url):
                 try {
                     const sysmsg_blacklist = ['知乎小伙伴', '知乎视频', '知乎团队', '知乎礼券', '知乎读书会团队'];
@@ -167,11 +175,12 @@ let magicJS = MagicJS(scriptName, "INFO");
                     let data = obj['data'].filter((element) => { return sysmsg_blacklist.indexOf(element['content']['title']) < 0 })
                     obj['data'] = data;
                     body = JSON.stringify(obj);
-                } catch (err) {
+                }
+                catch (err) {
                     magicJS.logError(`知乎拦截官方账号推广消息出现异常：${err}`);
                 }
                 break;
-                // 屏蔽官方营销消息
+            // 屏蔽官方营销消息
             case /^https?:\/\/api\.zhihu\.com\/notifications\/v3\/message\?/.test(magicJS.request.url):
                 try {
                     let obj = JSON.parse(magicJS.response.body);
@@ -181,23 +190,26 @@ let magicJS = MagicJS(scriptName, "INFO");
                             let unread_count = item['unread_count'];
                             if (unread_count > 0) {
                                 item['content']['text'] = '未读消息' + unread_count + '条';
-                            } else {
+                            }
+                            else {
                                 item['content']['text'] = '全部消息已读';
                             }
                             item['is_read'] = true;
                             item['unread_count'] = 0;
                             newItems.push(item);
-                        } else if (item['detail_title'] !== '知乎活动助手') {
+                        }
+                        else if (item['detail_title'] !== '知乎活动助手') {
                             newItems.push(item);
                         }
                     }
                     obj['data'] = newItems;
                     body = JSON.stringify(obj);
-                } catch (err) {
+                }
+                catch (err) {
                     magicJS.logError(`知乎屏蔽官方营销消息出现异常：${err}`);
                 }
                 break;
-                // 黑名单管理
+            // 黑名单管理
             case /^https?:\/\/api\.zhihu\.com\/settings\/blocked_users/.test(magicJS.request.url):
                 let userInfo = GetUserInfo();
                 const answer_blocked_users = ['会员推荐', '知乎付费咨询'];
@@ -223,10 +235,12 @@ let magicJS = MagicJS(scriptName, "INFO");
                                 magicJS.notify(`获取脚本黑名单结束，当前黑名单共${Object.keys(custom_blocked_users).length}人！`);
                                 magicJS.logInfo(`脚本黑名单内容：${JSON.stringify(custom_blocked_users)}。`);
                             }
-                        } else {
+                        }
+                        else {
                             magicJS.logWarning(`获取黑名单失败，接口响应不合法：${magicJS.response.body}`);
                         }
-                    } catch (err) {
+                    }
+                    catch (err) {
                         magicJS.del(blocked_users_key);
                         magicJS.logError(`获取黑名单失败，异常信息：${err}`);
                         magicJS.notify('获取黑名单失败，执行异常，已清空黑名单。');
@@ -242,11 +256,13 @@ let magicJS = MagicJS(scriptName, "INFO");
                             magicJS.write(blocked_users_key, custom_blocked_users, userInfo.id);
                             magicJS.logInfo(`${obj['name']}写入脚本黑名单成功，当前脚本黑名单数据：${JSON.stringify(custom_blocked_users)}`);
                             magicJS.notify(`已将用户 ${obj['name']} 写入脚本黑名单。`);
-                        } else {
+                        }
+                        else {
                             magicJS.logWarning(`写入黑名单失败，接口响应不合法：${magicJS.response.body}`);
                             magicJS.notify('写入脚本黑名单失败，接口返回不合法。');
                         }
-                    } catch (err) {
+                    }
+                    catch (err) {
                         magicJS.logError(`写入黑名单失败，异常信息：${err}`);
                         magicJS.notify('写入脚本黑名单失败，执行异常，请查阅日志。');
                     }
@@ -267,17 +283,19 @@ let magicJS = MagicJS(scriptName, "INFO");
                                     break;
                                 }
                             }
-                        } else {
+                        }
+                        else {
                             magicJS.logWarning(`移出黑名单失败，接口响应不合法：${magicJS.response.body}`);
                             magicJS.notify('移出脚本黑名单失败，接口返回不合法。');
                         }
-                    } catch (err) {
+                    }
+                    catch (err) {
                         magicJS.logError(`移出黑名单失败，异常信息：${err}`);
                         magicJS.notify('移出脚本黑名单失败，执行异常，请查阅日志。');
                     }
                 }
                 break;
-                // 去除预置关键字广告
+            // 去除预置关键字广告
             case /^https?:\/\/api\.zhihu\.com\/search\/preset_words\?/.test(magicJS.request.url):
                 try {
                     if (!!magicJS.response.body) {
@@ -291,11 +309,12 @@ let magicJS = MagicJS(scriptName, "INFO");
                             body = JSON.stringify(obj);
                         }
                     }
-                } catch (err) {
+                }
+                catch (err) {
                     magicJS.logError(`知乎去除预置关键字广告出现异常：${err}`);
                 }
                 break;
-                // 优化知乎软件配置
+            // 优化知乎软件配置
             case /^https?:\/\/appcloud2\.zhihu\.com\/v\d+\/config/.test(magicJS.request.url):
                 try {
                     if (!!magicJS.response.body) {
@@ -304,7 +323,8 @@ let magicJS = MagicJS(scriptName, "INFO");
                         obj['config']['zvideo_max_number'] = 1;
                         body = JSON.stringify(obj);
                     }
-                } catch (err) {
+                }
+                catch (err) {
                     magicJS.logError(`优化知乎软件配置出现异常：${err}`);
                 }
                 break;
@@ -312,12 +332,14 @@ let magicJS = MagicJS(scriptName, "INFO");
                 magicJS.logWarning('触发意外的请求处理，请确认脚本或复写配置正常。');
                 break;
         }
-    } else {
+    }
+    else {
         magicJS.logWarning('触发意外的请求处理，请确认脚本或复写配置正常。');
     }
     if (body) {
         magicJS.done({ body });
-    } else {
+    }
+    else {
         magicJS.done();
     }
 })();
@@ -329,24 +351,15 @@ function GetUserInfo() {
         if (typeof user_info === 'string') user_info = JSON.parse(user_info);
         if (!!user_info && user_info.hasOwnProperty('id')) {
             return user_info;
-        } else {
+        }
+        else {
             return defaultUserInfo;
         }
-    } catch (err) {
+    }
+    catch (err) {
         magicJS.logError(`获取用户信息出现异常：${err}`);
         return defaultUserInfo;
     }
 }
 
-function MagicJS(a = "MagicJS", b = "INFO") { const c = { accept: "Accept", "accept-ch": "Accept-CH", "accept-charset": "Accept-Charset", "accept-features": "Accept-Features", "accept-encoding": "Accept-Encoding", "accept-language": "Accept-Language", "accept-ranges": "Accept-Ranges", "access-control-allow-credentials": "Access-Control-Allow-Credentials", "access-control-allow-origin": "Access-Control-Allow-Origin", "access-control-allow-methods": "Access-Control-Allow-Methods", "access-control-allow-headers": "Access-Control-Allow-Headers", "access-control-max-age": "Access-Control-Max-Age", "access-control-expose-headers": "Access-Control-Expose-Headers", "access-control-request-method": "Access-Control-Request-Method", "access-control-request-headers": "Access-Control-Request-Headers", age: "Age", allow: "Allow", alternates: "Alternates", authorization: "Authorization", "cache-control": "Cache-Control", connection: "Connection", "content-encoding": "Content-Encoding", "content-language": "Content-Language", "content-length": "Content-Length", "content-location": "Content-Location", "content-md5": "Content-MD5", "content-range": "Content-Range", "content-security-policy": "Content-Security-Policy", "content-type": "Content-Type", cookie: "Cookie", dnt: "DNT", date: "Date", etag: "ETag", expect: "Expect", expires: "Expires", from: "From", host: "Host", "if-match": "If-Match", "if-modified-since": "If-Modified-Since", "if-none-match": "If-None-Match", "if-range": "If-Range", "if-unmodified-since": "If-Unmodified-Since", "last-event-id": "Last-Event-ID", "last-modified": "Last-Modified", link: "Link", location: "Location", "max-forwards": "Max-Forwards", negotiate: "Negotiate", origin: "Origin", pragma: "Pragma", "proxy-authenticate": "Proxy-Authenticate", "proxy-authorization": "Proxy-Authorization", range: "Range", referer: "Referer", "retry-after": "Retry-After", "sec-websocket-extensions": "Sec-Websocket-Extensions", "sec-websocket-key": "Sec-Websocket-Key", "sec-websocket-origin": "Sec-Websocket-Origin", "sec-websocket-protocol": "Sec-Websocket-Protocol", "sec-websocket-version": "Sec-Websocket-Version", server: "Server", "set-cookie": "Set-Cookie", "set-cookie2": "Set-Cookie2", "strict-transport-security": "Strict-Transport-Security", tcn: "TCN", te: "TE", trailer: "Trailer", "transfer-encoding": "Transfer-Encoding", upgrade: "Upgrade", "user-agent": "User-Agent", "variant-vary": "Variant-Vary", vary: "Vary", via: "Via", warning: "Warning", "www-authenticate": "WWW-Authenticate", "x-content-duration": "X-Content-Duration", "x-content-security-policy": "X-Content-Security-Policy", "x-dnsprefetch-control": "X-DNSPrefetch-Control", "x-frame-options": "X-Frame-Options", "x-requested-with": "X-Requested-With", "x-surge-skip-scripting": "X-Surge-Skip-Scripting" }; return new class { constructor() { if (this.version = "2.2.3.2", this.scriptName = a, this.logLevels = { DEBUG: 5, INFO: 4, NOTIFY: 3, WARNING: 2, ERROR: 1, CRITICAL: 0, NONE: -1 }, this.isLoon = "undefined" != typeof $loon, this.isQuanX = "undefined" != typeof $task, this.isJSBox = "undefined" != typeof $drive, this.isNode = "undefined" != typeof module && !this.isJSBox, this.isSurge = "undefined" != typeof $httpClient && !this.isLoon, this.platform = this.getPlatform(), this.node = { request: void 0, fs: void 0, data: {} }, this.iOSUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Mobile/15E148 Safari/604.1", this.pcUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36 Edg/84.0.522.59", this.logLevel = b, this._barkUrl = "", this.isNode) { this.node.fs = require("fs"), this.node.request = require("request"); try { this.node.fs.accessSync("./magic.json", this.node.fs.constants.R_OK | this.node.fs.constants.W_OK) } catch (a) { this.node.fs.writeFileSync("./magic.json", "{}", { encoding: "utf8" }) }
-                    this.node.data = require("./magic.json") } else this.isJSBox && ($file.exists("drive://MagicJS") || $file.mkdir("drive://MagicJS"), $file.exists("drive://MagicJS/magic.json") || $file.write({ data: $data({ string: "{}" }), path: "drive://MagicJS/magic.json" })) }
-            set barkUrl(a) { this._barkUrl = a.replace(/\/+$/g, "") }
-            set logLevel(a) { this._logLevel = "string" == typeof a ? a.toUpperCase() : "DEBUG" }
-            get logLevel() { return this._logLevel }
-            get isRequest() { return "undefined" != typeof $request && "undefined" == typeof $response }
-            get isResponse() { return "undefined" != typeof $response }
-            get request() { return "undefined" == typeof $request ? void 0 : $request }
-            get response() { return "undefined" == typeof $response ? void 0 : ($response.hasOwnProperty("status") && ($response.statusCode = $response.status), $response.hasOwnProperty("statusCode") && ($response.status = $response.statusCode), $response) }
-            getPlatform() { return this.isSurge ? "Surge" : this.isQuanX ? "QuantumultX" : this.isLoon ? "Loon" : this.isJSBox ? "JSBox" : this.isNode ? "Node.js" : "unknown" }
-            read(a, b = "") { let c = "";
-                    this.isSurge || this.isLoon ? c = $persistentStore.read(a) : this.isQuanX ? c = $prefs.valueForKey(a) : this.isNode ? c = this.node.data : this.isJSBox && (c = $file.read("drive://MagicJS/magic.json").string); try { this.isNode && (c = c[a]), this.isJSBox && (c = JSON.parse(c)[a]), !b || ("string" == typeof c && (c = JSON.parse(c)), c = c && "object" == typeof c ? c[b] : null) } catch (d) { this.logError(d), c = b ? {} : null, this.del(a) } "undefined" == typeof c && (c = null); try {!c || "string" != typeof c || (c = JSON.parse(c)) } catch (a) {} return this.logDebug(`READ DATA [${a}]${b?`[${b}]`:""}(${typeof c})\n${JSON.stringify(c)}`),c}write(a,b,c=""){let d=c?{}:"";if(!!c&&(this.isSurge||this.isLoon)?d=$persistentStore.read(a):!!c&&this.isQuanX?d=$prefs.valueForKey(a):this.isNode?d=this.node.data:this.isJSBox&&(d=JSON.parse($file.read("drive://MagicJS/magic.json").string)),!!c){try{"string"==typeof d&&(d=JSON.parse(d)),d="object"==typeof d&&d?d:{}}catch(b){this.logError(b),this.del(a),d={}}this.isJSBox||this.isNode?((!d.hasOwnProperty(a)||"object"!=typeof d[a]||null===d[a])&&(d[a]={}),!d[a].hasOwnProperty(c)&&(d[a][c]=null),"undefined"==typeof b?delete d[a][c]:d[a][c]=b):"undefined"==typeof b?delete d[c]:d[c]=b}else this.isNode||this.isJSBox?"undefined"==typeof b?delete d[a]:d[a]=b:"undefined"==typeof b?d=null:d=b;"object"==typeof d&&(d=JSON.stringify(d)),this.isSurge||this.isLoon?$persistentStore.write(d,a):this.isQuanX?$prefs.setValueForKey(d,a):this.isNode?this.node.fs.writeFileSync("./magic.json",d):this.isJSBox&&$file.write({data:$data({string:d}),path:"drive://MagicJS/magic.json"}),this.logDebug(`WRITE DATA [${a}]${c?`[${c}]`:""}(${typeof b})\n${JSON.stringify(b)}`)}del(a,b=""){this.logDebug(`DELETE KEY [${a}]${!b?"":`[${b}]`}`),this.write(a,null,b)}notify(a=this.scriptName,b="",c="",d=""){if(d=(a=>{let b={};if(this.isSurge||this.isQuanX||this.isLoon)if("string"==typeof a)this.isLoon?b={openUrl:a}:this.isQuanX?b={"open-url":a}:this.isSurge&&(b={url:a});else if("object"==typeof a){let c={Surge:{openUrl:"url","open-url":"url"},Loon:{url:"openUrl","open-url":"openUrl","media-url":"mediaUrl"},QuantumultX:{url:"open-url",openUrl:"open-url",mediaUrl:"media-url"}},d=Object.keys(a);for(let e=0;e<d.length;e++)c[this.platform][d[e]]?b[c[this.platform][d[e]]]=a[d[e]]:b[d[e]]=a[d[e]]}return b})(d),this.logNotify(`title:${a}\nsubTitle:${b}\nbody:${c}\noptions:${"object"==typeof d?JSON.stringify(d):d}`),1==arguments.length&&(a=this.scriptName,b="",c=arguments[0]),this.isSurge||this.isLoon)$notification.post(a,b,c,d);else if(this.isQuanX)$notify(a,b,c,d);else if(this.isNode){if(!!this._barkUrl){let d=encodeURI(`${a}/${b}\n${c}`);this.get(`${this._barkUrl}/${d}`,()=>{})}}else if(this.isJSBox){let d={title:a,body:b?`${b}\n${c}`:c};$push.schedule(d)}}log(a,b="INFO"){this.logLevels[this._logLevel]<this.logLevels[b.toUpperCase()]||console.log(`[${b}] [${this.scriptName}]\n${a}\n`)}logDebug(a){this.log(a,"DEBUG")}logInfo(a){this.log(a,"INFO")}logNotify(a){this.log(a,"NOTIFY")}logWarning(a){this.log(a,"WARNING")}logError(a){this.log(a,"ERROR")}adapterHttpOptions(a,b){let d="object"==typeof a?Object.assign({},a):{url:a,headers:{}};if(d.hasOwnProperty("header")&&!d.hasOwnProperty("headers")&&(d.headers=d.header,delete d.header),"object"==typeof d.headers&&!0)for(let a in d.headers)c[a]&&(d.headers[c[a]]=d.headers[a],delete d.headers[a]);!!d.headers&&"object"==typeof d.headers&&!!d.headers["User-Agent"]||((!!!d.headers||"object"!=typeof d.headers)&&(d.headers={}),d.headers["User-Agent"]=this.isNode?this.pcUserAgent:this.iOSUserAgent);let e=!1;if(("object"==typeof d.opts&&(!0===d.opts.hints||!0===d.opts["Skip-Scripting"])||"object"==typeof d.headers&&!0===d.headers["X-Surge-Skip-Scripting"])&&(e=!0),e||(this.isSurge?d.headers["X-Surge-Skip-Scripting"]=!1:this.isLoon?d.headers["X-Requested-With"]="XMLHttpRequest":this.isQuanX&&("object"!=typeof d.opts&&(d.opts={}),d.opts.hints=!1)),(!this.isSurge||e)&&delete d.headers["X-Surge-Skip-Scripting"],!this.isQuanX&&d.hasOwnProperty("opts")&&delete d.opts,this.isQuanX&&d.hasOwnProperty("opts")&&delete d.opts["Skip-Scripting"],"GET"===b&&!this.isNode&&!!d.body){let a=Object.keys(d.body).map(a=>"undefined"==typeof d.body?"":`${encodeURIComponent(a)}=${encodeURIComponent(d.body[a])}`).join("&");0>d.url.indexOf("?")&&(d.url+="?"),d.url.lastIndexOf("&")+1!=d.url.length&&d.url.lastIndexOf("?")+1!=d.url.length&&(d.url+="&"),d.url+=a,delete d.body}return this.isQuanX?(d.hasOwnProperty("body")&&"string"!=typeof d.body&&(d.body=JSON.stringify(d.body)),d.method=b):this.isNode?(delete d.headers["Accept-Encoding"],"object"==typeof d.body&&("GET"===b?(d.qs=d.body,delete d.body):"POST"==b&&(d.json=!0,d.body=d.body))):this.isJSBox&&(d.header=d.headers,delete d.headers),d}get(a,b){let c=this.adapterHttpOptions(a,"GET");if(this.logDebug(`HTTP GET: ${JSON.stringify(c)}`),this.isSurge||this.isLoon)$httpClient.get(c,b);else if(this.isQuanX)$task.fetch(c).then(a=>{a.status=a.statusCode,b(null,a,a.body)},a=>b(a.error,null,null));else{if(this.isNode)return this.node.request.get(c,b);this.isJSBox&&(c.handler=a=>{let c=a.error?JSON.stringify(a.error):void 0,d="object"==typeof a.data?JSON.stringify(a.data):a.data;b(c,a.response,d)},$http.get(c))}}post(a,b){let c=this.adapterHttpOptions(a,"POST");if(this.logDebug(`HTTP POST: ${JSON.stringify(c)}`),this.isSurge||this.isLoon)$httpClient.post(c,b);else if(this.isQuanX)$task.fetch(c).then(a=>{a.status=a.statusCode,b(null,a,a.body)},a=>{b(a.error,null,null)});else{if(this.isNode)return this.node.request.post(c,b);this.isJSBox&&(c.handler=a=>{let c=a.error?JSON.stringify(a.error):void 0,d="object"==typeof a.data?JSON.stringify(a.data):a.data;b(c,a.response,d)},$http.post(c))}}done(a={}){"undefined"!=typeof $done&&$done(a)}isToday(a){if(null==a)return!1;else{let b=new Date;return"string"==typeof a&&(a=new Date(a)),b.getFullYear()==a.getFullYear()&&b.getMonth()==a.getMonth()&&b.getDay()==a.getDay()}}isNumber(a){return"NaN"!==parseFloat(a).toString()}attempt(a,b=null){return a.then(a=>[null,a]).catch(a=>(this.logError(a),[a,b]))}retry(a,b=5,c=0,d=null){return(...e)=>new Promise((f,g)=>{function h(...e){Promise.resolve().then(()=>a.apply(this,e)).then(a=>{"function"==typeof d?Promise.resolve().then(()=>d(a)).then(()=>{f(a)}).catch(a=>{this.logError(a),1<=b&&0<c?setTimeout(()=>h.apply(this,e),c):1<=b?h.apply(this,e):g(a),b--}):f(a)}).catch(a=>{this.logError(a),1<=b&&0<c?setTimeout(()=>h.apply(this,e),c):1<=b?h.apply(this,e):g(a),b--})}h.apply(this,e)})}formatTime(a,b="yyyy-MM-dd hh:mm:ss"){var c={"M+":a.getMonth()+1,"d+":a.getDate(),"h+":a.getHours(),"m+":a.getMinutes(),"s+":a.getSeconds(),"q+":Math.floor((a.getMonth()+3)/3),S:a.getMilliseconds()};for(let d in /(y+)/.test(b)&&(b=b.replace(RegExp.$1,(a.getFullYear()+"").substr(4-RegExp.$1.length))),c)new RegExp("("+d+")").test(b)&&(b=b.replace(RegExp.$1,1==RegExp.$1.length?c[d]:("00"+c[d]).substr((""+c[d]).length)));return b}now(){return this.formatTime(new Date,"yyyy-MM-dd hh:mm:ss")}today(){return this.formatTime(new Date,"yyyy-MM-dd")}sleep(a){return new Promise(b=>setTimeout(b,a))}}(a)}
+function MagicJS(a = "MagicJS", b = "INFO") { const c = { accept: "Accept", "accept-ch": "Accept-CH", "accept-charset": "Accept-Charset", "accept-features": "Accept-Features", "accept-encoding": "Accept-Encoding", "accept-language": "Accept-Language", "accept-ranges": "Accept-Ranges", "access-control-allow-credentials": "Access-Control-Allow-Credentials", "access-control-allow-origin": "Access-Control-Allow-Origin", "access-control-allow-methods": "Access-Control-Allow-Methods", "access-control-allow-headers": "Access-Control-Allow-Headers", "access-control-max-age": "Access-Control-Max-Age", "access-control-expose-headers": "Access-Control-Expose-Headers", "access-control-request-method": "Access-Control-Request-Method", "access-control-request-headers": "Access-Control-Request-Headers", age: "Age", allow: "Allow", alternates: "Alternates", authorization: "Authorization", "cache-control": "Cache-Control", connection: "Connection", "content-encoding": "Content-Encoding", "content-language": "Content-Language", "content-length": "Content-Length", "content-location": "Content-Location", "content-md5": "Content-MD5", "content-range": "Content-Range", "content-security-policy": "Content-Security-Policy", "content-type": "Content-Type", cookie: "Cookie", dnt: "DNT", date: "Date", etag: "ETag", expect: "Expect", expires: "Expires", from: "From", host: "Host", "if-match": "If-Match", "if-modified-since": "If-Modified-Since", "if-none-match": "If-None-Match", "if-range": "If-Range", "if-unmodified-since": "If-Unmodified-Since", "last-event-id": "Last-Event-ID", "last-modified": "Last-Modified", link: "Link", location: "Location", "max-forwards": "Max-Forwards", negotiate: "Negotiate", origin: "Origin", pragma: "Pragma", "proxy-authenticate": "Proxy-Authenticate", "proxy-authorization": "Proxy-Authorization", range: "Range", referer: "Referer", "retry-after": "Retry-After", "sec-websocket-extensions": "Sec-Websocket-Extensions", "sec-websocket-key": "Sec-Websocket-Key", "sec-websocket-origin": "Sec-Websocket-Origin", "sec-websocket-protocol": "Sec-Websocket-Protocol", "sec-websocket-version": "Sec-Websocket-Version", server: "Server", "set-cookie": "Set-Cookie", "set-cookie2": "Set-Cookie2", "strict-transport-security": "Strict-Transport-Security", tcn: "TCN", te: "TE", trailer: "Trailer", "transfer-encoding": "Transfer-Encoding", upgrade: "Upgrade", "user-agent": "User-Agent", "variant-vary": "Variant-Vary", vary: "Vary", via: "Via", warning: "Warning", "www-authenticate": "WWW-Authenticate", "x-content-duration": "X-Content-Duration", "x-content-security-policy": "X-Content-Security-Policy", "x-dnsprefetch-control": "X-DNSPrefetch-Control", "x-frame-options": "X-Frame-Options", "x-requested-with": "X-Requested-With", "x-surge-skip-scripting": "X-Surge-Skip-Scripting" }; return new class { constructor() { if (this.version = "2.2.3.2", this.scriptName = a, this.logLevels = { DEBUG: 5, INFO: 4, NOTIFY: 3, WARNING: 2, ERROR: 1, CRITICAL: 0, NONE: -1 }, this.isLoon = "undefined" != typeof $loon, this.isQuanX = "undefined" != typeof $task, this.isJSBox = "undefined" != typeof $drive, this.isNode = "undefined" != typeof module && !this.isJSBox, this.isSurge = "undefined" != typeof $httpClient && !this.isLoon, this.platform = this.getPlatform(), this.node = { request: void 0, fs: void 0, data: {} }, this.iOSUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Mobile/15E148 Safari/604.1", this.pcUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36 Edg/84.0.522.59", this.logLevel = b, this._barkUrl = "", this.isNode) { this.node.fs = require("fs"), this.node.request = require("request"); try { this.node.fs.accessSync("./magic.json", this.node.fs.constants.R_OK | this.node.fs.constants.W_OK) } catch (a) { this.node.fs.writeFileSync("./magic.json", "{}", { encoding: "utf8" }) } this.node.data = require("./magic.json") } else this.isJSBox && ($file.exists("drive://MagicJS") || $file.mkdir("drive://MagicJS"), $file.exists("drive://MagicJS/magic.json") || $file.write({ data: $data({ string: "{}" }), path: "drive://MagicJS/magic.json" })) } set barkUrl(a) { this._barkUrl = a.replace(/\/+$/g, "") } set logLevel(a) { this._logLevel = "string" == typeof a ? a.toUpperCase() : "DEBUG" } get logLevel() { return this._logLevel } get isRequest() { return "undefined" != typeof $request && "undefined" == typeof $response } get isResponse() { return "undefined" != typeof $response } get request() { return "undefined" == typeof $request ? void 0 : $request } get response() { return "undefined" == typeof $response ? void 0 : ($response.hasOwnProperty("status") && ($response.statusCode = $response.status), $response.hasOwnProperty("statusCode") && ($response.status = $response.statusCode), $response) } getPlatform() { return this.isSurge ? "Surge" : this.isQuanX ? "QuantumultX" : this.isLoon ? "Loon" : this.isJSBox ? "JSBox" : this.isNode ? "Node.js" : "unknown" } read(a, b = "") { let c = ""; this.isSurge || this.isLoon ? c = $persistentStore.read(a) : this.isQuanX ? c = $prefs.valueForKey(a) : this.isNode ? c = this.node.data : this.isJSBox && (c = $file.read("drive://MagicJS/magic.json").string); try { this.isNode && (c = c[a]), this.isJSBox && (c = JSON.parse(c)[a]), !b || ("string" == typeof c && (c = JSON.parse(c)), c = c && "object" == typeof c ? c[b] : null) } catch (d) { this.logError(d), c = b ? {} : null, this.del(a) } "undefined" == typeof c && (c = null); try { !c || "string" != typeof c || (c = JSON.parse(c)) } catch (a) { } return this.logDebug(`READ DATA [${a}]${b ? `[${b}]` : ""}(${typeof c})\n${JSON.stringify(c)}`), c } write(a, b, c = "") { let d = c ? {} : ""; if (!!c && (this.isSurge || this.isLoon) ? d = $persistentStore.read(a) : !!c && this.isQuanX ? d = $prefs.valueForKey(a) : this.isNode ? d = this.node.data : this.isJSBox && (d = JSON.parse($file.read("drive://MagicJS/magic.json").string)), !!c) { try { "string" == typeof d && (d = JSON.parse(d)), d = "object" == typeof d && d ? d : {} } catch (b) { this.logError(b), this.del(a), d = {} } this.isJSBox || this.isNode ? ((!d.hasOwnProperty(a) || "object" != typeof d[a] || null === d[a]) && (d[a] = {}), !d[a].hasOwnProperty(c) && (d[a][c] = null), "undefined" == typeof b ? delete d[a][c] : d[a][c] = b) : "undefined" == typeof b ? delete d[c] : d[c] = b } else this.isNode || this.isJSBox ? "undefined" == typeof b ? delete d[a] : d[a] = b : "undefined" == typeof b ? d = null : d = b; "object" == typeof d && (d = JSON.stringify(d)), this.isSurge || this.isLoon ? $persistentStore.write(d, a) : this.isQuanX ? $prefs.setValueForKey(d, a) : this.isNode ? this.node.fs.writeFileSync("./magic.json", d) : this.isJSBox && $file.write({ data: $data({ string: d }), path: "drive://MagicJS/magic.json" }), this.logDebug(`WRITE DATA [${a}]${c ? `[${c}]` : ""}(${typeof b})\n${JSON.stringify(b)}`) } del(a, b = "") { this.logDebug(`DELETE KEY [${a}]${!b ? "" : `[${b}]`}`), this.write(a, null, b) } notify(a = this.scriptName, b = "", c = "", d = "") { if (d = (a => { let b = {}; if (this.isSurge || this.isQuanX || this.isLoon) if ("string" == typeof a) this.isLoon ? b = { openUrl: a } : this.isQuanX ? b = { "open-url": a } : this.isSurge && (b = { url: a }); else if ("object" == typeof a) { let c = { Surge: { openUrl: "url", "open-url": "url" }, Loon: { url: "openUrl", "open-url": "openUrl", "media-url": "mediaUrl" }, QuantumultX: { url: "open-url", openUrl: "open-url", mediaUrl: "media-url" } }, d = Object.keys(a); for (let e = 0; e < d.length; e++)c[this.platform][d[e]] ? b[c[this.platform][d[e]]] = a[d[e]] : b[d[e]] = a[d[e]] } return b })(d), this.logNotify(`title:${a}\nsubTitle:${b}\nbody:${c}\noptions:${"object" == typeof d ? JSON.stringify(d) : d}`), 1 == arguments.length && (a = this.scriptName, b = "", c = arguments[0]), this.isSurge || this.isLoon) $notification.post(a, b, c, d); else if (this.isQuanX) $notify(a, b, c, d); else if (this.isNode) { if (!!this._barkUrl) { let d = encodeURI(`${a}/${b}\n${c}`); this.get(`${this._barkUrl}/${d}`, () => { }) } } else if (this.isJSBox) { let d = { title: a, body: b ? `${b}\n${c}` : c }; $push.schedule(d) } } log(a, b = "INFO") { this.logLevels[this._logLevel] < this.logLevels[b.toUpperCase()] || console.log(`[${b}] [${this.scriptName}]\n${a}\n`) } logDebug(a) { this.log(a, "DEBUG") } logInfo(a) { this.log(a, "INFO") } logNotify(a) { this.log(a, "NOTIFY") } logWarning(a) { this.log(a, "WARNING") } logError(a) { this.log(a, "ERROR") } adapterHttpOptions(a, b) { let d = "object" == typeof a ? Object.assign({}, a) : { url: a, headers: {} }; if (d.hasOwnProperty("header") && !d.hasOwnProperty("headers") && (d.headers = d.header, delete d.header), "object" == typeof d.headers && !0) for (let a in d.headers) c[a] && (d.headers[c[a]] = d.headers[a], delete d.headers[a]); !!d.headers && "object" == typeof d.headers && !!d.headers["User-Agent"] || ((!!!d.headers || "object" != typeof d.headers) && (d.headers = {}), d.headers["User-Agent"] = this.isNode ? this.pcUserAgent : this.iOSUserAgent); let e = !1; if (("object" == typeof d.opts && (!0 === d.opts.hints || !0 === d.opts["Skip-Scripting"]) || "object" == typeof d.headers && !0 === d.headers["X-Surge-Skip-Scripting"]) && (e = !0), e || (this.isSurge ? d.headers["X-Surge-Skip-Scripting"] = !1 : this.isLoon ? d.headers["X-Requested-With"] = "XMLHttpRequest" : this.isQuanX && ("object" != typeof d.opts && (d.opts = {}), d.opts.hints = !1)), (!this.isSurge || e) && delete d.headers["X-Surge-Skip-Scripting"], !this.isQuanX && d.hasOwnProperty("opts") && delete d.opts, this.isQuanX && d.hasOwnProperty("opts") && delete d.opts["Skip-Scripting"], "GET" === b && !this.isNode && !!d.body) { let a = Object.keys(d.body).map(a => "undefined" == typeof d.body ? "" : `${encodeURIComponent(a)}=${encodeURIComponent(d.body[a])}`).join("&"); 0 > d.url.indexOf("?") && (d.url += "?"), d.url.lastIndexOf("&") + 1 != d.url.length && d.url.lastIndexOf("?") + 1 != d.url.length && (d.url += "&"), d.url += a, delete d.body } return this.isQuanX ? (d.hasOwnProperty("body") && "string" != typeof d.body && (d.body = JSON.stringify(d.body)), d.method = b) : this.isNode ? (delete d.headers["Accept-Encoding"], "object" == typeof d.body && ("GET" === b ? (d.qs = d.body, delete d.body) : "POST" == b && (d.json = !0, d.body = d.body))) : this.isJSBox && (d.header = d.headers, delete d.headers), d } get(a, b) { let c = this.adapterHttpOptions(a, "GET"); if (this.logDebug(`HTTP GET: ${JSON.stringify(c)}`), this.isSurge || this.isLoon) $httpClient.get(c, b); else if (this.isQuanX) $task.fetch(c).then(a => { a.status = a.statusCode, b(null, a, a.body) }, a => b(a.error, null, null)); else { if (this.isNode) return this.node.request.get(c, b); this.isJSBox && (c.handler = a => { let c = a.error ? JSON.stringify(a.error) : void 0, d = "object" == typeof a.data ? JSON.stringify(a.data) : a.data; b(c, a.response, d) }, $http.get(c)) } } post(a, b) { let c = this.adapterHttpOptions(a, "POST"); if (this.logDebug(`HTTP POST: ${JSON.stringify(c)}`), this.isSurge || this.isLoon) $httpClient.post(c, b); else if (this.isQuanX) $task.fetch(c).then(a => { a.status = a.statusCode, b(null, a, a.body) }, a => { b(a.error, null, null) }); else { if (this.isNode) return this.node.request.post(c, b); this.isJSBox && (c.handler = a => { let c = a.error ? JSON.stringify(a.error) : void 0, d = "object" == typeof a.data ? JSON.stringify(a.data) : a.data; b(c, a.response, d) }, $http.post(c)) } } done(a = {}) { "undefined" != typeof $done && $done(a) } isToday(a) { if (null == a) return !1; else { let b = new Date; return "string" == typeof a && (a = new Date(a)), b.getFullYear() == a.getFullYear() && b.getMonth() == a.getMonth() && b.getDay() == a.getDay() } } isNumber(a) { return "NaN" !== parseFloat(a).toString() } attempt(a, b = null) { return a.then(a => [null, a]).catch(a => (this.logError(a), [a, b])) } retry(a, b = 5, c = 0, d = null) { return (...e) => new Promise((f, g) => { function h(...e) { Promise.resolve().then(() => a.apply(this, e)).then(a => { "function" == typeof d ? Promise.resolve().then(() => d(a)).then(() => { f(a) }).catch(a => { this.logError(a), 1 <= b && 0 < c ? setTimeout(() => h.apply(this, e), c) : 1 <= b ? h.apply(this, e) : g(a), b-- }) : f(a) }).catch(a => { this.logError(a), 1 <= b && 0 < c ? setTimeout(() => h.apply(this, e), c) : 1 <= b ? h.apply(this, e) : g(a), b-- }) } h.apply(this, e) }) } formatTime(a, b = "yyyy-MM-dd hh:mm:ss") { var c = { "M+": a.getMonth() + 1, "d+": a.getDate(), "h+": a.getHours(), "m+": a.getMinutes(), "s+": a.getSeconds(), "q+": Math.floor((a.getMonth() + 3) / 3), S: a.getMilliseconds() }; for (let d in /(y+)/.test(b) && (b = b.replace(RegExp.$1, (a.getFullYear() + "").substr(4 - RegExp.$1.length))), c) new RegExp("(" + d + ")").test(b) && (b = b.replace(RegExp.$1, 1 == RegExp.$1.length ? c[d] : ("00" + c[d]).substr(("" + c[d]).length))); return b } now() { return this.formatTime(new Date, "yyyy-MM-dd hh:mm:ss") } today() { return this.formatTime(new Date, "yyyy-MM-dd") } sleep(a) { return new Promise(b => setTimeout(b, a)) } }(a) }

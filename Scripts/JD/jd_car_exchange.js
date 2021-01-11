@@ -1,31 +1,31 @@
 /*
- * @Author: lxk0301 https://github.com/lxk0301
- * @Date: 2020-11-27 09:19:21
- * @Last Modified by: lxk0301
- * @Last Modified time: 2021-1-1 16:58:02
- */
-/*
-十元街脚本，一周签到下来可获得30京豆，一天任意时刻运行一次即可
-更新地址：https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_syj.js
-参考github@jidesheng6修改而来
-已支持IOS双京东账号, Node.js支持N个京东账号
+京东汽车兑换，500赛点兑换500京豆
+长期活动
+
+活动入口
+京东APP：首页👉京东汽车兑换👉屏幕右中部，车主福利
+活动网页地址：https://h5.m.jd.com/babelDiy/Zeus/44bjzCpzH9GpspWeBzYSqBA7jEtP/index.html#/journey
+
+更新地址：https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_car_exchange
+已支持IOS, Node.js支持N个京东账号
 脚本兼容: QuantumultX, Surge, Loon, 小火箭，JSBox, Node.js
+
 ============Quantumultx===============
 [task_local]
-#十元街
-10 7 * * * https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_syj.js, tag=十元街, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jd_syj.png, enabled=true
+#京东汽车兑换
+0 0 * * * https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_car_exchange.js, tag=京东汽车兑换, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jd_redPacket.png, enabled=true
 
 ================Loon==============
 [Script]
-cron "10 7 * * *" script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_syj.js, tag=十元街
+cron "0 0 * * *" script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_car_exchange.js, tag=京东汽车兑换
 
 ===============Surge=================
-十元街 = type=cron,cronexp="10 7 * * *",wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_syj.js
+京东汽车兑换 = type=cron,cronexp="0 0 * * *",wake-system=1,timeout=2000,script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_car_exchange.js
 
 ============小火箭=========
-十元街 = type=cron,script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_syj.js, cronexpr="10 7 * * *", timeout=200, enable=true
+京东汽车兑换 = type=cron,script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_car_exchange.js, cronexpr="0 0 * * *", timeout=2000, enable=true
  */
-const $ = new Env('十元街');
+const $ = new Env('京东汽车兑换');
 
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
@@ -38,7 +38,8 @@ if ($.isNode()) {
     Object.keys(jdCookieNode).forEach((item) => {
         cookiesArr.push(jdCookieNode[item])
     })
-    if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => { };
+    if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => {
+    };
 } else {
     let cookiesData = $.getdata('CookiesJD') || "[]";
     cookiesData = jsonParse(cookiesData);
@@ -48,34 +49,25 @@ if ($.isNode()) {
     cookiesArr.reverse();
     cookiesArr = cookiesArr.filter(item => item !== "" && item !== null && item !== undefined);
 }
-const JD_API_HOST = 'https://api.m.jd.com/api';
+const JD_API_HOST = 'https://car-member.jd.com/api/';
 !(async () => {
     if (!cookiesArr[0]) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    for (let i = 0; i < cookiesArr.length; i++) {
-        if (cookiesArr[i]) {
-            cookie = cookiesArr[i];
-            $.UserName = decodeURIComponent(cookie.match(/pt_pin=(.+?);/) && cookie.match(/pt_pin=(.+?);/)[1])
-            $.index = i + 1;
-            $.isLogin = true;
-            $.nickName = '';
-            message = '';
-            await TotalBean();
-            console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-            if (!$.isLogin) {
-                $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
-
-                if ($.isNode()) {
-                    await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
-                }
-                continue
+    for (let j = 0; j < 20; ++j)
+        for (let i = 0; i < cookiesArr.length; i++) {
+            if (cookiesArr[i]) {
+                cookie = cookiesArr[i];
+                $.UserName = decodeURIComponent(cookie.match(/pt_pin=(.+?);/) && cookie.match(/pt_pin=(.+?);/)[1])
+                $.index = i + 1;
+                console.log(`京东账号${$.index} ${$.UserName}`)
+                $.isLogin = true;
+                $.nickName = '';
+                message = '';
+                await jdCar();
             }
-            await userSignIn();
-            await showMsg();
         }
-    }
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -84,51 +76,27 @@ const JD_API_HOST = 'https://api.m.jd.com/api';
         $.done();
     })
 
+async function jdCar() {
+    await exchange()
+}
+
 function showMsg() {
     return new Promise(resolve => {
         $.msg($.name, '', `【京东账号${$.index}】${$.nickName}\n${message}`);
         resolve()
     })
 }
-let signFlag = 0;
-function userSignIn() {
+
+function exchange() {
     return new Promise(resolve => {
-        const body = { "activityId": "ccd8067defcd4787871b7f0c96fcbf5c", "inviterId": "", "channel": "MiniProgram" };
-        $.get(taskUrl('userSignIn', body), async (err, resp, data) => {
+        $.post(taskUrl('v1/user/exchange/bean'), (err, resp, data) => {
             try {
                 if (err) {
-                    console.log(`${JSON.stringify(err)}`)
-                    console.log(`${$.name} API请求失败，请检查网路重试`)
+                    data = JSON.parse(resp.body)
                 } else {
                     if (safeGet(data)) {
                         data = JSON.parse(data);
-                        if (data.code === 0) {
-                            signFlag = 0;
-                            console.log(`${$.name}今日签到成功`);
-                            if (data.data) {
-                                let { alreadySignDays, beanTotalNum, todayPrize, eachDayPrize } = data.data;
-                                message += `【第${alreadySignDays}日签到】成功，获得${todayPrize.beanAmount}京豆 🐶\n`;
-                                if (alreadySignDays === 7) alreadySignDays = 0;
-                                message += `【明日签到】可获得${eachDayPrize[alreadySignDays].beanAmount}京豆 🐶\n`;
-                                message += `【累计获得】${beanTotalNum}京豆 🐶\n`;
-                            }
-                        } else if (data.code === 81) {
-                            console.log(`今日已签到`)
-                            message += `【签到】失败，今日已签到`;
-                        } else if (data.code === 6) {
-                            //此处有时会遇到 服务器繁忙 导致签到失败,故重复三次签到
-                            $.log(`${$.name}签到失败${signFlag}:${data.msg}`);
-                            if (signFlag < 3) {
-                                signFlag++;
-                                await userSignIn();
-                            }
-                        } else if (data.code === 66) {
-                            //此处有时会遇到 服务器繁忙 导致签到失败,故重复三次签到
-                            $.log(`${$.name}签到失败:${data.msg}`);
-                            message += `【签到】失败，${data.msg}`;
-                        } else {
-                            console.log(`异常：${JSON.stringify(data)}`)
-                        }
+                        console.log(`兑换结果：${JSON.stringify(data)}`)
                     }
                 }
             } catch (e) {
@@ -139,22 +107,27 @@ function userSignIn() {
         })
     })
 }
+
 function taskUrl(function_id, body = {}) {
     return {
-        url: `${JD_API_HOST}?functionId=${function_id}&body=${escape(JSON.stringify(body))}&appid=swat_miniprogram&osVersion=5.0.0&clientVersion=3.1.3&fromType=wxapp&timestamp=${new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000}`,
+        url: `${JD_API_HOST}${function_id}?timestamp=${new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000}`,
         headers: {
             "Accept": "*/*",
             "Accept-Encoding": "gzip, deflate, br",
             "Accept-Language": "zh-cn",
             "Connection": "keep-alive",
             "Content-Type": "application/x-www-form-urlencoded",
-            "Host": "api.m.jd.com",
-            "Referer": "https://servicewechat.com/wxa5bf5ee667d91626/108/page-frame.html",
+            "Host": "car-member.jd.com",
+            'activityid': '39443aee3ff74fcb806a6f755240d127',
+            'origin': 'https://h5.m.jd.com',
+            "Referer": "https://h5.m.jd.com/babelDiy/Zeus/44bjzCpzH9GpspWeBzYSqBA7jEtP/index.html",
             "Cookie": cookie,
             "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
         }
     }
 }
+
+
 function TotalBean() {
     return new Promise(async resolve => {
         const options = {
@@ -195,6 +168,7 @@ function TotalBean() {
         })
     })
 }
+
 function safeGet(data) {
     try {
         if (typeof JSON.parse(data) == "object") {

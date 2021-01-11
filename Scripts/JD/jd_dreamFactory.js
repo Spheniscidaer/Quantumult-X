@@ -1,6 +1,6 @@
 /*
 京东京喜工厂
-更新时间：2020-12-27
+更新时间：2021-1-9
 活动入口 :京东APP->游戏与互动->查看更多->京喜工厂
 或者: 京东APP首页搜索 "玩一玩" ,造物工厂即可
 
@@ -54,7 +54,7 @@ if ($.isNode()) {
 !(async () => {
   await requireConfig();
   if (!cookiesArr[0]) {
-    $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/', { "open-url": "https://bean.m.jd.com/" });
+    $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
     return;
   }
   for (let i = 0; i < cookiesArr.length; i++) {
@@ -73,7 +73,7 @@ if ($.isNode()) {
       await TotalBean();
       console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
       if (!$.isLogin) {
-        $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/`, { "open-url": "https://bean.m.jd.com/" });
+        $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
 
         if ($.isNode()) {
           await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
@@ -113,7 +113,11 @@ async function jdDreamFactory() {
 // 收取发电机的电力
 function collectElectricity(facId = $.factoryId, help = false, master) {
   return new Promise(async resolve => {
-    let body = `factoryid=${facId}&apptoken=&pgtimestamp=&phoneID=&doubleflag=1`;
+    // let url = `/dreamfactory/generator/CollectCurrentElectricity?zone=dream_factory&apptoken=&pgtimestamp=&phoneID=&factoryid=${facId}&doubleflag=1&sceneval=2&g_login_type=1`;
+    // if (help && master) {
+    //   url = `/dreamfactory/generator/CollectCurrentElectricity?zone=dream_factory&factoryid=${facId}&master=${master}&sceneval=2&g_login_type=1`;
+    // }
+    let body = `factoryid=${facId}&apptoken=&pgtimestamp=&phoneID=&doubleflag=1&_stk=_time,apptoken,doubleflag,factoryid,pgtimestamp,phoneID,timeStamp,zone`;
     if (help && master) {
       body += `factoryid=${facId}&master=${master}`;
     }
@@ -156,6 +160,7 @@ function collectElectricity(facId = $.factoryId, help = false, master) {
 // 投入电力
 function investElectric() {
   return new Promise(async resolve => {
+    // const url = `/dreamfactory/userinfo/InvestElectric?zone=dream_factory&productionId=${$.productionId}&sceneval=2&g_login_type=1`;
     $.get(taskurl('userinfo/InvestElectric', `productionId=${$.productionId}`), (err, resp, data) => {
       try {
         if (err) {
@@ -185,6 +190,7 @@ function investElectric() {
 // 初始化任务
 function taskList() {
   return new Promise(async resolve => {
+    // const url = `/newtasksys/newtasksys_front/GetUserTaskStatusList?source=dreamfactory&bizCode=dream_factory&sceneval=2&g_login_type=1`;
     $.get(newtasksysUrl('GetUserTaskStatusList'), async (err, resp, data) => {
       try {
         if (err) {
@@ -241,6 +247,7 @@ function taskList() {
 // 获得用户电力情况
 function getUserElectricity() {
   return new Promise(async resolve => {
+    // const url = `/dreamfactory/generator/QueryCurrentElectricityQuantity?zone=dream_factory&factoryid=${$.factoryId}&sceneval=2&g_login_type=1`
     $.get(taskurl(`generator/QueryCurrentElectricityQuantity`, `factoryid=${$.factoryId}`), async (err, resp, data) => {
       try {
         if (err) {
@@ -257,11 +264,13 @@ function getUserElectricity() {
               if (data.data.nextCollectDoubleFlag === 1) {
                 if (data.data.currentElectricityQuantity === data.data.maxElectricityQuantity && data.data.doubleElectricityFlag) {
                   console.log(`发电机：电力可翻倍并收获`)
+                  // await shareReport();
                   await collectElectricity()
                 } else {
                   message += `【发电机电力】当前 ${data.data.currentElectricityQuantity} 电力，未达到收获标准\n`
                 }
               } else {
+                //再收取双倍电力达到上限时，直接收取，不再等到满级
                 await collectElectricity()
               }
             }
@@ -279,6 +288,7 @@ function getUserElectricity() {
 //查询有多少的招工电力可收取
 function QueryHireReward() {
   return new Promise(async resolve => {
+    // const url = `/dreamfactory/friend/HireAward?zone=dream_factory&date=${new Date().Format("yyyyMMdd")}&type=0&sceneval=2&g_login_type=1`
     $.get(taskurl('friend/QueryHireReward'), async (err, resp, data) => {
       try {
         if (err) {
@@ -306,11 +316,11 @@ function QueryHireReward() {
     })
   })
 }
-// 收取招工电力
+// 收取招工/劳模电力
 function hireAward(date, type = 0) {
   return new Promise(async resolve => {
     // const url = `/dreamfactory/friend/HireAward?zone=dream_factory&date=${new Date().Format("yyyyMMdd")}&type=0&sceneval=2&g_login_type=1`
-    $.get(taskurl('friend/HireAward', `date=${date}&type=${type}`), async (err, resp, data) => {
+    $.get(taskurl('friend/HireAward', `date=${date}&type=${type}&_stk=_time,date,type,zone`), async (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
@@ -478,7 +488,7 @@ function completeTask(taskId, taskName) {
 function doTask(taskId) {
   return new Promise(async resolve => {
     // const url = `/newtasksys/newtasksys_front/DoTask?source=dreamfactory&bizCode=dream_factory&taskId=${taskId}&sceneval=2&g_login_type=1`;
-    $.get(newtasksysUrl('DoTask', taskId), (err, resp, data) => {
+    $.get(newtasksysUrl('DoTask', taskId, '_time,bizCode,configExtra,source,taskId'), (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
@@ -666,7 +676,7 @@ function DrawProductionStagePrize() {
 }
 async function PickUp(encryptPin = $.encryptPin, help = false) {
   $.pickUpMyselfComponent = true;
-  const GetUserComponentRes = await GetUserComponent(encryptPin);
+  const GetUserComponentRes = await GetUserComponent(encryptPin, 500);
   if (GetUserComponentRes && GetUserComponentRes['ret'] === 0) {
     const { componentList } = GetUserComponentRes['data'];
     if (componentList && componentList.length <= 0) {
@@ -703,36 +713,38 @@ async function PickUp(encryptPin = $.encryptPin, help = false) {
     }
   }
 }
-function GetUserComponent(pin = $.encryptPin) {
+function GetUserComponent(pin = $.encryptPin, timeout = 0) {
   return new Promise(resolve => {
-    $.get(taskurl('usermaterial/GetUserComponent', `pin=${pin}`), (err, resp, data) => {
-      try {
-        if (err) {
-          console.log(`${JSON.stringify(err)}`)
-          console.log(`${$.name} API请求失败，请检查网路重试`)
-        } else {
-          if (safeGet(data)) {
-            data = JSON.parse(data);
-            if (data['ret'] === 0) {
+    setTimeout(() => {
+      $.get(taskurl('usermaterial/GetUserComponent', `pin=${pin}`), (err, resp, data) => {
+        try {
+          if (err) {
+            console.log(`${JSON.stringify(err)}`)
+            console.log(`${$.name} API请求失败，请检查网路重试`)
+          } else {
+            if (safeGet(data)) {
+              data = JSON.parse(data);
+              if (data['ret'] === 0) {
 
-            } else {
-              console.log(`GetUserComponent失败：${JSON.stringify(data)}`)
+              } else {
+                console.log(`GetUserComponent失败：${JSON.stringify(data)}`)
+              }
             }
           }
+        } catch (e) {
+          $.logErr(e, resp)
+        } finally {
+          resolve(data);
         }
-      } catch (e) {
-        $.logErr(e, resp)
-      } finally {
-        resolve(data);
-      }
-    })
+      })
+    }, timeout)
   })
 }
 //收取地下随机零件电力API
 
 function PickUpComponent(index, encryptPin) {
   return new Promise(resolve => {
-    $.get(taskurl('usermaterial/PickUpComponent', `placeId=${index}&pin=${encryptPin}`), (err, resp, data) => {
+    $.get(taskurl('usermaterial/PickUpComponent', `placeId=${index}&pin=${encryptPin}&_stk=_time,pin,placeId,zone`), (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
@@ -1287,47 +1299,13 @@ async function showMsg() {
     resolve()
   })
 }
-function readShareCode() {
-  console.log(`开始`)
-  return new Promise(async resolve => {
-    $.get({ url: `http://api.turinglabs.net/api/v1/jd/jxfactory/read/${randomCount}/` }, (err, resp, data) => {
-      try {
-        if (err) {
-          console.log(`${JSON.stringify(err)}`)
-          console.log(`${$.name} API请求失败，请检查网路重试`)
-        } else {
-          if (data) {
-            console.log(`随机取${randomCount}个码放到您固定的互助码后面(不影响已有固定互助)`)
-            data = JSON.parse(data);
-          }
-        }
-      } catch (e) {
-        $.logErr(e, resp)
-      } finally {
-        resolve(data);
-      }
-    })
-    await $.wait(10000);
-    resolve()
-  })
-}
+
 //格式化助力码
 function shareCodesFormat() {
   return new Promise(async resolve => {
-    // console.log(`第${$.index}个京东账号的助力码:::${$.shareCodesArr[$.index - 1]}`)
     $.newShareCodes = [];
-    if ($.shareCodesArr[$.index - 1]) {
-      $.newShareCodes = $.shareCodesArr[$.index - 1].split('@');
-    } else {
-      console.log(`由于您第${$.index}个京东账号未提供shareCode,将采纳本脚本自带的助力码\n`)
-      const tempIndex = $.index > inviteCodes.length ? (inviteCodes.length - 1) : ($.index - 1);
-      $.newShareCodes = inviteCodes[tempIndex].split('@');
-    }
-    const readShareCodeRes = await readShareCode();
-    if (readShareCodeRes && readShareCodeRes.code === 200) {
-      $.newShareCodes = [...new Set([...$.newShareCodes, ...(readShareCodeRes.data || [])])];
-    }
-    console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify($.newShareCodes)}`)
+    const tempIndex = $.index > inviteCodes.length ? (inviteCodes.length - 1) : ($.index - 1);
+    $.newShareCodes = inviteCodes[tempIndex].split('@');
     resolve();
   })
 }
@@ -1424,10 +1402,13 @@ function taskurl(functionId, body = '') {
     }
   }
 }
-function newtasksysUrl(functionId, taskId) {
+function newtasksysUrl(functionId, taskId, stk) {
   let url = `${JD_API_HOST}/newtasksys/newtasksys_front/${functionId}?source=dreamfactory&bizCode=dream_factory&sceneval=2&g_login_type=1&_time=${Date.now()}&_=${Date.now()}`;
   if (taskId) {
     url += `&taskId=${taskId}`;
+  }
+  if (stk) {
+    url += `&_stk=${stk}`;
   }
   return {
     url,

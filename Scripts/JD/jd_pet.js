@@ -437,7 +437,29 @@ async function showMsg() {
     $.log(`\n${message}\n`);
   }
 }
-
+function readShareCode() {
+  return new Promise(async resolve => {
+    $.get({ url: `http://api.turinglabs.net/api/v1/jd/pet/read/${randomCount}/`, 'timeout': 10000 }, (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(`${JSON.stringify(err)}`)
+          console.log(`${$.name} API请求失败，请检查网路重试`)
+        } else {
+          if (data) {
+            console.log(`随机取个${randomCount}码放到您固定的互助码后面(不影响已有固定互助)`)
+            data = JSON.parse(data);
+          }
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve(data);
+      }
+    })
+    await $.wait(10000);
+    resolve()
+  })
+}
 function shareCodesFormat() {
   return new Promise(async resolve => {
     newShareCodes = [];
@@ -472,7 +494,40 @@ function requireConfig() {
           jdPetShareArr.push(jdPetShareCodes[item])
         }
       })
+    } else {
+      const boxShareCodeArr = ['jd_pet1', 'jd_pet2', 'jd_pet3', 'jd_pet4', 'jd_pet5'];
+      const boxShareCodeArr2 = ['jd2_pet1', 'jd2_pet2', 'jd2_pet3', 'jd2_pet4', 'jd2_pet5'];
+      const isBox1 = boxShareCodeArr.some((item) => {
+        const boxShareCode = $.getdata(item);
+        return (boxShareCode !== undefined && boxShareCode !== null && boxShareCode !== '');
+      });
+      const isBox2 = boxShareCodeArr2.some((item) => {
+        const boxShareCode = $.getdata(item);
+        return (boxShareCode !== undefined && boxShareCode !== null && boxShareCode !== '');
+      });
+      isBox = isBox1 ? isBox1 : isBox2;
+      if (isBox1) {
+        let temp = [];
+        for (const item of boxShareCodeArr) {
+          if ($.getdata(item)) {
+            temp.push($.getdata(item))
+          }
+        }
+        jdPetShareArr.push(temp.join('@'));
+      }
+      if (isBox2) {
+        let temp = [];
+        for (const item of boxShareCodeArr2) {
+          if ($.getdata(item)) {
+            temp.push($.getdata(item))
+          }
+        }
+        jdPetShareArr.push(temp.join('@'));
+      }
     }
+    // console.log(`jdPetShareArr::${JSON.stringify(jdPetShareArr)}`)
+    // console.log(`jdPetShareArr账号长度::${jdPetShareArr.length}`)
+    console.log(`您提供了${jdPetShareArr.length}个账号的东东萌宠助力码\n`);
     resolve()
   })
 }
@@ -488,7 +543,7 @@ function TotalBean() {
         "Connection": "keep-alive",
         "Cookie": cookie,
         "Referer": "https://wqs.jd.com/my/jingdou/my.shtml?sceneval=2",
-        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0")
+        "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0")
       }
     }
     $.post(options, (err, resp, data) => {
@@ -542,7 +597,7 @@ async function request(function_id, body = {}) {
 //     url: `${JD_API_HOST}?functionId=${function_id}&appid=wh5&loginWQBiz=pet-town&body=${escape(JSON.stringify(body))}`,
 //     headers: {
 //       Cookie: cookie,
-//       UserAgent: $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
+//       UserAgent: $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
 //     }
 //   };
 // }
@@ -554,7 +609,7 @@ function taskUrl(function_id, body = {}) {
     body: `body=${escape(JSON.stringify(body))}&appid=wh5&loginWQBiz=pet-town&clientVersion=9.0.4`,
     headers: {
       'Cookie': cookie,
-      'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
+      'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
       'Host': 'api.m.jd.com',
       'Content-Type': 'application/x-www-form-urlencoded',
     }

@@ -47,6 +47,8 @@ if ($.isNode()) {
 const JD_API_HOST = 'https://api.m.jd.com/';
 !(async () => {
     $.newShareCodes = []
+    // await getAuthorShareCode();
+    // await getAuthorShareCode2();
     if (!cookiesArr[0]) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
@@ -72,6 +74,34 @@ const JD_API_HOST = 'https://api.m.jd.com/';
             await jdBeanHome();
         }
     }
+    // for (let i = 0; i < cookiesArr.length; i++) {
+    //   if (cookiesArr[i]) {
+    //     $.UserName = decodeURIComponent(cookie.match(/pt_pin=(.+?);/) && cookie.match(/pt_pin=(.+?);/)[1])
+    //     console.log(`${$.UserName}去帮助下一个人`)
+    //     cookie = cookiesArr[i];
+    //     if ($.newShareCodes.length > 1) {
+    //       let code = $.newShareCodes[(i + 1) % $.newShareCodes.length]
+    //       await help(code[0], code[1])
+    //     }
+    //     if (helpAuthor && $.authorCode) {
+    //       console.log(`去帮助作者`)
+    //       const helpRes = await help($.authorCode[0], $.authorCode[1])
+    //       if (helpRes && helpRes.data.respCode === 'SG209') {
+    //         console.log(`助力次数已耗尽，跳出助力`)
+    //         break;
+    //       }
+    //     }
+    //     if (helpAuthor && $.authorCode2) {
+    //       for (let code of $.authorCode2) {
+    //         const helpRes = await help(code.shareCode, code.groupCode);
+    //         if (helpRes && helpRes.data.respCode === 'SG209') {
+    //           console.log(`助力次数已耗尽，跳出助力`)
+    //           break;
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -82,6 +112,11 @@ const JD_API_HOST = 'https://api.m.jd.com/';
 
 async function jdBeanHome() {
     $.doneState = false
+    // for (let i = 0; i < 3; ++i) {
+    //   await doTask2()
+    //   await $.wait(1000)
+    //   if ($.doneState) break
+    // }
     do {
         await doTask2()
         await $.wait(3000)
@@ -153,7 +188,28 @@ function getAuthorShareCode() {
         })
     })
 }
-
+function getAuthorShareCode2() {
+    return new Promise(resolve => {
+        $.get({
+            url: "https://gitee.com/lxk0301/updateTeam/raw/master/jd_updateBeanHome.json", headers: {
+                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/87.0.4280.88"
+            }
+        }, async (err, resp, data) => {
+            try {
+                if (err) {
+                } else {
+                    if (safeGet(data)) {
+                        $.authorCode2 = JSON.parse(data);
+                    }
+                }
+            } catch (e) {
+                $.logErr(e, resp)
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
 function getUserInfo() {
     return new Promise(resolve => {
         $.post(taskUrl('signBeanGroupStageIndex', 'body'), async (err, resp, data) => {
@@ -367,7 +423,7 @@ function taskGetUrl(function_id, body) {
             'Host': 'api.m.jd.com',
             'Accept': '*/*',
             'Connection': 'keep-alive',
-            'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
+            'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
             'Accept-Language': 'zh-Hans-CN;q=1,en-CN;q=0.9',
             'Accept-Encoding': 'gzip, deflate, br',
             'Content-Type': "application/x-www-form-urlencoded"
@@ -388,7 +444,7 @@ function taskUrl(function_id, body) {
             'Host': 'api.m.jd.com',
             'Accept': '*/*',
             'Connection': 'keep-alive',
-            'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
+            'User-Agent': $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0"),
             'Accept-Language': 'zh-Hans-CN;q=1,en-CN;q=0.9',
             'Accept-Encoding': 'gzip, deflate, br',
             'Content-Type': "application/x-www-form-urlencoded"
@@ -408,7 +464,7 @@ function TotalBean() {
                 "Connection": "keep-alive",
                 "Cookie": cookie,
                 "Referer": "https://wqs.jd.com/my/jingdou/my.shtml?sceneval=2",
-                "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0") : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0")
+                "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0")
             }
         }
         $.post(options, (err, resp, data) => {

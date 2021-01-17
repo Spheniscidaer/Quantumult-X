@@ -263,9 +263,9 @@ function getJxFactory() {
                                     $.encryptPin = data.user.encryptPin;
                                     // subTitle = data.user.pin;
                                     console.log(`【账号${$.index}（${$.nickName || $.UserName}）京喜工厂】${data.user.encryptPin}`);
-                                    const url = `http://api.turinglabs.net/api/v1/jd/jxfactory/create/${data.user.encryptPin}/`;
-                                    const JXGC = await get(url);
-                                    console.log(JXGC);
+                                    // const url = `http://api.turinglabs.net/api/v1/jd/jxfactory/create/${data.user.encryptPin}/`;
+                                    // const JXGC = await get(url);
+                                    // console.log(JXGC);
                                 }
                             } else {
                                 $.unActive = false; //标记是否开启了京喜活动或者选购了商品进行生产
@@ -401,9 +401,9 @@ function getJdPet() {
                         }
 
                         console.log(`【账号${$.index}（${$.nickName || $.UserName}）京东萌宠】${$.petInfo.shareCode}`);
-                        const url = `http://api.turinglabs.net/api/v1/jd/pet/create/${$.petInfo.shareCode}/`;
-                        const JdPet = await get(url);
-                        console.log(JdPet);
+                        // const url = `http://api.turinglabs.net/api/v1/jd/pet/create/${$.petInfo.shareCode}/`;
+                        // const JdPet = await get(url);
+                        // console.log(JdPet);
 
                     } else if (initPetTownRes.code === "0") {
                         console.log(`初始化萌宠失败:  ${initPetTownRes.message}`);
@@ -434,9 +434,9 @@ async function getJdZZ() {
                             data = JSON.parse(data);
                             if (data.data.shareTaskRes) {
                                 console.log(`【账号${$.index}（${$.nickName || $.UserName}）京东赚赚】${data.data.shareTaskRes.itemId}`);
-                                const url = `https://code.chiang.fun/api/v1/jd/jdzz/create/${data.data.shareTaskRes.itemId}`;
+                                const url = `https://code.chiang.fun/api/v1/jd/jdzz/create/${data.data.shareTaskRes.itemId}/`;
                                 const JdZZ = await get(url);
-                                console.log(JdZZ);
+                                console.log(JdZZ.msg);
                             } else {
                                 //console.log(`已满5人助力,暂时看不到您的京东赚赚好友助力码`)
                             }
@@ -538,9 +538,9 @@ async function getPlantBean() {
             const shareUrl = $.plantBeanIndexResult.data.jwordShareInfo.shareUrl;
             $.myPlantUuid = getParam(shareUrl, "plantUuid");
             console.log(`【账号${$.index}（${$.nickName || $.UserName}）种豆得豆】${$.myPlantUuid}`);
-            const url = `http://api.turinglabs.net/api/v1/jd/bean/create/${$.myPlantUuid}/`;
-            const jdPlantBean = await get(url);
-            console.log(jdPlantBean);
+            // const url = `http://api.turinglabs.net/api/v1/jd/bean/create/${$.myPlantUuid}/`;
+            // const jdPlantBean = await get(url);
+            // console.log(jdPlantBean);
 
         } else {
             console.log(
@@ -605,9 +605,9 @@ async function getJDFruit() {
         await initForFarm();
         if ($.farmInfo.farmUserPro) {
             console.log(`【账号${$.index}（${$.nickName || $.UserName}）京东农场】${$.farmInfo.farmUserPro.shareCode}`);
-            const url = `http://api.turinglabs.net/api/v1/jd/farm/create/${$.farmInfo.farmUserPro.shareCode}/`;
-            const fruit = await get(url);
-            console.log(fruit);
+            // const url = `http://api.turinglabs.net/api/v1/jd/farm/create/${$.farmInfo.farmUserPro.shareCode}/`;
+            // const fruit = await get(url);
+            // console.log(fruit);
 
         } else {
             /*console.log(
@@ -655,7 +655,7 @@ async function getJoy() {
                             console.log(`【账号${$.index}（${$.nickName || $.UserName}）crazyJoy】${data.data.userInviteCode}`)
                             const url = `https://code.chiang.fun/api/v1/jd/jdcrazyjoy/create/${data.data.userInviteCode}`
                             const joy = await get(url);
-                            console.log(joy);
+                            console.log(joy.msg);
                         }
                     }
                 }
@@ -670,13 +670,21 @@ async function getJoy() {
 async function getShareCode() {
     console.log(`======账号${$.index}开始======`)
     await getJdFactory()
+    await sleep(2000)
     await getJxFactory()
+    await sleep(2000)
     await getJxNc()
+    await sleep(2000)
     await getJdPet()
+    await sleep(2000)
     await getPlantBean()
+    await sleep(2000)
     await getJDFruit()
+    await sleep(2000)
     await getJdZZ()
+    await sleep(2000)
     await getJoy()
+    await sleep(2000)
     console.log(`======账号${$.index}结束======\n`)
 }
 
@@ -716,13 +724,27 @@ function taskGetUrl(url) {
         url: `${url}`,
         headers: {
             'Connection': `keep-alive`,
-            'Accept': `application/json`,
+            'Accept': `text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9`,
             'Host': `code.chiang.fun`,
+            'Upgrade-Insecure-Requests': `1`,
+            'DNT': `1`,
+            'Sec-Fetch-Site': `none`,
+            'Sec-Fetch-Mode': `navigate`,
+            'Sec-Fetch-User': `?1`,
+            'Sec-Fetch-Dest': `document`,
             'Accept-Encoding': `gzip, deflate, br`,
             'Accept-Language': `zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6`,
             'User-Agent': `Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 Edg/87.0.664.75`
         },
     }
+}
+
+function sleep(s) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, s);
+    })
 }
 
 function taskPostUrl(function_id, body = {}, function_id2) {

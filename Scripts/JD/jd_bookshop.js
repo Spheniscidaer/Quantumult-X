@@ -6,17 +6,17 @@
 ============Quantumultx===============
 [task_local]
 #口袋书店
-1 8,12,18 * * * https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_bookshop.js, tag=口袋书店, enabled=true
+1 8,12,18 * * * https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_bookshop.js, tag=口袋书店, enabled=true
 
 ================Loon==============
 [Script]
-cron "1 8,12,18 * * *" script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_bookshop.js,tag=口袋书店
+cron "1 8,12,18 * * *" script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_bookshop.js,tag=口袋书店
 
 ===============Surge=================
-口袋书店 = type=cron,cronexp="1 8,12,18 * * *",wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_bookshop.js
+口袋书店 = type=cron,cronexp="1 8,12,18 * * *",wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_bookshop.js
 
 ============小火箭=========
-口袋书店 = type=cron,script-path=https://raw.githubusercontent.com/lxk0301/jd_scripts/master/jd_bookshop.js, cronexpr="1 8,12,18* * *", timeout=200, enable=true
+口袋书店 = type=cron,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_bookshop.js, cronexpr="1 8,12,18* * *", timeout=200, enable=true
  */
 const $ = new Env('口袋书店');
 const notify = $.isNode() ? require('./sendNotify') : '';
@@ -670,9 +670,20 @@ function TotalBean() {
 //格式化助力码
 function shareCodesFormat() {
     return new Promise(async resolve => {
+        // console.log(`第${$.index}个京东账号的助力码:::${$.shareCodesArr[$.index - 1]}`)
         $.newShareCodes = [];
-        const tempIndex = $.index > inviteCodes.length ? (inviteCodes.length - 1) : ($.index - 1);
-        $.newShareCodes = inviteCodes[tempIndex].split('@');
+        if ($.shareCodesArr[$.index - 1]) {
+            $.newShareCodes = $.shareCodesArr[$.index - 1].split('@');
+        } else {
+            console.log(`由于您第${$.index}个京东账号未提供shareCode,将采纳本脚本自带的助力码\n`)
+            const tempIndex = $.index > inviteCodes.length ? (inviteCodes.length - 1) : ($.index - 1);
+            $.newShareCodes = inviteCodes[tempIndex].split('@');
+        }
+        const readShareCodeRes = null //await readShareCode();
+        if (readShareCodeRes && readShareCodeRes.code === 200) {
+            $.newShareCodes = [...new Set([...$.newShareCodes, ...(readShareCodeRes.data || [])])];
+        }
+        console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify($.newShareCodes)}`)
         resolve();
     })
 }

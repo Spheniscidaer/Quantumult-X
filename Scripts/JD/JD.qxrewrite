@@ -15,3 +15,5 @@ https:\/\/wq\.jd\.com\/user_new\/info\/GetJDUserInfoUnion  url script-request-he
 ^https:\/\/draw\.jdfcloud\.com(\/mirror)?\/\/api\/user\/user\/detail\?openId= url script-request-header ./JD/jd_joy_run.js
 
 ^https\:\/\/wq\.jd\.com\/cubeactive\/farm\/dotask url script-request-header ./JD/jx_nc.cookie.js
+
+https:\/\/wq\.jd\.com\/bases\/jssdk\/GetWxJsApiSign url script-request-header ./JD/jd_wechat_sign.js

@@ -1,6 +1,6 @@
 # Quantumult-X 
 
-**自用 不要fork**
+**自用**
 
 ## 获取Cookie
 * 京东： 浏览器访问 `https://bean.m.jd.com` 点击签到并且出现签到日历

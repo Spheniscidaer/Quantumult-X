@@ -23,7 +23,7 @@ let message = '',
     UserName = '',
     subTitle = ''
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
-!(async() => {
+!(async () => {
     if (!cookiesArr[0]) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/', { "open-url": "https://bean.m.jd.com/" });
         return;
@@ -40,13 +40,13 @@ const JD_API_HOST = 'https://api.m.jd.com/client.action';
         }
     }
 })()
-.catch((e) => {
-    $.log('', `❌ ${$.UserName}, 失败! 原因: ${e}!`, '')
-})
+    .catch((e) => {
+        $.log('', `❌ ${$.UserName}, 失败! 原因: ${e}!`, '')
+    })
 
-.finally(() => {
-    $.done();
-})
+    .finally(() => {
+        $.done();
+    })
 
 function showMsg() {
     if ($.isLogin) {
@@ -187,7 +187,7 @@ function Env(t, e) {
         getjson(t, e) {
             let s = e;
             const i = this.getdata(t);
-            if (i) try { s = JSON.parse(this.getdata(t)) } catch {}
+            if (i) try { s = JSON.parse(this.getdata(t)) } catch { }
             return s
         }
         setjson(t, e) { try { return this.setdata(JSON.stringify(t), e) } catch { return !1 } }
@@ -259,8 +259,8 @@ function Env(t, e) {
         getval(t) { return this.isSurge() || this.isLoon() ? $persistentStore.read(t) : this.isQuanX() ? $prefs.valueForKey(t) : this.isNode() ? (this.data = this.loaddata(), this.data[t]) : this.data && this.data[t] || null }
         setval(t, e) { return this.isSurge() || this.isLoon() ? $persistentStore.write(t, e) : this.isQuanX() ? $prefs.setValueForKey(t, e) : this.isNode() ? (this.data = this.loaddata(), this.data[e] = t, this.writedata(), !0) : this.data && this.data[e] || null }
         initGotEnv(t) { this.got = this.got ? this.got : require("got"), this.cktough = this.cktough ? this.cktough : require("tough-cookie"), this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar, t && (t.headers = t.headers ? t.headers : {}, void 0 === t.headers.Cookie && void 0 === t.cookieJar && (t.cookieJar = this.ckjar)) }
-        get(t, e = (() => {})) {
-            t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"]), this.isSurge() || this.isLoon() ? $httpClient.get(t, (t, s, i) => {!t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) }) : this.isQuanX() ? $task.fetch(t).then(t => {
+        get(t, e = (() => { })) {
+            t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"]), this.isSurge() || this.isLoon() ? $httpClient.get(t, (t, s, i) => { !t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) }) : this.isQuanX() ? $task.fetch(t).then(t => {
                 const { statusCode: s, statusCode: i, headers: o, body: r } = t;
                 e(null, { status: s, statusCode: i, headers: o, body: r }, r)
             }, t => e(t)) : this.isNode() && (this.initGotEnv(t), this.got(t).on("redirect", (t, e) => {
@@ -273,8 +273,8 @@ function Env(t, e) {
                 e(null, { status: s, statusCode: i, headers: o, body: r }, r)
             }, t => e(t)))
         }
-        post(t, e = (() => {})) {
-            if (t.body && t.headers && !t.headers["Content-Type"] && (t.headers["Content-Type"] = "application/x-www-form-urlencoded"), t.headers && delete t.headers["Content-Length"], this.isSurge() || this.isLoon()) $httpClient.post(t, (t, s, i) => {!t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) });
+        post(t, e = (() => { })) {
+            if (t.body && t.headers && !t.headers["Content-Type"] && (t.headers["Content-Type"] = "application/x-www-form-urlencoded"), t.headers && delete t.headers["Content-Length"], this.isSurge() || this.isLoon()) $httpClient.post(t, (t, s, i) => { !t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) });
             else if (this.isQuanX()) t.method = "POST", $task.fetch(t).then(t => {
                 const { statusCode: s, statusCode: i, headers: o, body: r } = t;
                 e(null, { status: s, statusCode: i, headers: o, body: r }, r)

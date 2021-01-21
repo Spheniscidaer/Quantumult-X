@@ -20,10 +20,10 @@
 cron "0 0 * * *" script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_car_exchange.js, tag=京东汽车兑换
 
 ===============Surge=================
-京东汽车兑换 = type=cron,cronexp="0 0 * * *",wake-system=1,timeout=2000,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_car_exchange.js
+京东汽车兑换 = type=cron,cronexp="0 0 * * *",wake-system=1,timeout=3600,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_car_exchange.js
 
 ============小火箭=========
-京东汽车兑换 = type=cron,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_car_exchange.js, cronexpr="0 0 * * *", timeout=2000, enable=true
+京东汽车兑换 = type=cron,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_car_exchange.js, cronexpr="0 0 * * *", timeout=3600, enable=true
  */
 const $ = new Env('京东汽车兑换');
 
@@ -140,7 +140,7 @@ function TotalBean() {
                 "Connection": "keep-alive",
                 "Cookie": cookie,
                 "Referer": "https://wqs.jd.com/my/jingdou/my.shtml?sceneval=2",
-                "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0")
+                "User-Agent": "jdapp;iPhone;9.3.5;14.3;e0ffc4a28d23c7d2e201ecf1dce749d180a104f7;network/wifi;supportApplePay/0;hasUPPay/0;hasOCPay/0;model/iPhone10,3;addressid/1438079049;supportBestPay/0;appBuild/167515;jdSupportDarkMode/0;pv/87.20;apprpd/Home_Main;ref/JDWebViewController;psq/2;ads/;psn/e0ffc4a28d23c7d2e201ecf1dce749d180a104f7|273;jdv/0|kong|t_1001719029_|jingfen|9829338e25244b33b0e37f72e16bdb8c|1610965482434|1610965483;adk/;app_device/IOS;pap/JA2015_311210|9.3.5|IOS 14.3;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"
             }
         }
         $.post(options, (err, resp, data) => {

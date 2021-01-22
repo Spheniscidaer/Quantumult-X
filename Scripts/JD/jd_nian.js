@@ -835,7 +835,7 @@ function readShareCode() {
                 resolve(data);
             }
         })
-        await $.wait(2000);
+        await $.wait(10000);
         resolve()
     })
 }

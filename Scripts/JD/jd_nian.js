@@ -161,6 +161,7 @@ async function doTask() {
                         if (task.status === 1) {
                             await collectScore(item.taskId, task.itemId);
                         }
+                        await $.wait(3000)
                     }
                 } else if (item.status === 2) {
                     console.log(`${item.taskName}已做完`)
@@ -174,6 +175,7 @@ async function doTask() {
                     if (task.status === 1) {
                         await collectScore(item.taskId, task.itemId, 1);
                     }
+                    await $.wait(3000)
                 }
             } else if (item.status === 2) {
                 console.log(`${item.taskName}已做完`)
@@ -187,6 +189,13 @@ async function doTask() {
                         await collectScore(item.taskId, task.itemId, 1);
                     }
                 }
+            } else if (item.status === 2) {
+                console.log(`${item.taskName}已做完`)
+            }
+        } else if (item.taskType === 13) {
+            if (item.status === 1) {
+                console.log(`准备做此任务：${item.taskName}`)
+                await collectScore(item.taskId, "1");
             } else if (item.status === 2) {
                 console.log(`${item.taskName}已做完`)
             }
@@ -257,7 +266,7 @@ function getHomeData(info = false) {
                             $.secretp = null
                             return
                         }
-                        console.log(`当前爆竹${$.userInfo.raiseInfo.remainScore}🧨，下一关需要${$.userInfo.raiseInfo.nextLevelScore}🧨`)
+                        console.log(`当前爆竹${$.userInfo.raiseInfo.remainScore}🧨，下一关需要${$.userInfo.raiseInfo.nextLevelScore - $.userInfo.raiseInfo.curLevelStartScore}🧨`)
 
                         if (info) {
                             message += `当前爆竹${$.userInfo.raiseInfo.remainScore}🧨\n`
@@ -267,8 +276,8 @@ function getHomeData(info = false) {
                             console.log(`可收取的爆竹大于0，去收取爆竹`)
                             await collectProduceScore()
                         }
-                        if (parseInt($.userInfo.raiseInfo.remainScore) >= parseInt($.userInfo.raiseInfo.curLevelStartScore)) {
-                            console.log(`去升级`)
+                        if (parseInt($.userInfo.raiseInfo.remainScore) >= parseInt($.userInfo.raiseInfo.nextLevelScore - $.userInfo.raiseInfo.curLevelStartScore)) {
+                            console.log(`当前爆竹🧨大于升级所需爆竹🧨，去升级`)
                             await $.wait(2000)
                             await raise()
                         }
@@ -898,7 +907,7 @@ function taskPostUrl(function_id, body = {}, function_id2) {
             "origin": "https://h5.m.jd.com",
             "referer": "https://h5.m.jd.com/",
             'Content-Type': 'application/x-www-form-urlencoded',
-            "User-Agent": "jdapp;iPhone;9.3.5;14.3;e0ffc4a28d23c7d2e201ecf1dce749d180a104f7;network/wifi;supportApplePay/0;hasUPPay/0;hasOCPay/0;model/iPhone10,3;addressid/1438079049;supportBestPay/0;appBuild/167515;jdSupportDarkMode/0;pv/87.20;apprpd/Home_Main;ref/JDWebViewController;psq/2;ads/;psn/e0ffc4a28d23c7d2e201ecf1dce749d180a104f7|273;jdv/0|kong|t_1001719029_|jingfen|9829338e25244b33b0e37f72e16bdb8c|1610965482434|1610965483;adk/;app_device/IOS;pap/JA2015_311210|9.3.5|IOS 14.3;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"
+            "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0")
         }
     }
 }
@@ -914,7 +923,7 @@ function TotalBean() {
                 "Connection": "keep-alive",
                 "Cookie": cookie,
                 "Referer": "https://wqs.jd.com/my/jingdou/my.shtml?sceneval=2",
-                "User-Agent": "jdapp;iPhone;9.3.5;14.3;e0ffc4a28d23c7d2e201ecf1dce749d180a104f7;network/wifi;supportApplePay/0;hasUPPay/0;hasOCPay/0;model/iPhone10,3;addressid/1438079049;supportBestPay/0;appBuild/167515;jdSupportDarkMode/0;pv/87.20;apprpd/Home_Main;ref/JDWebViewController;psq/2;ads/;psn/e0ffc4a28d23c7d2e201ecf1dce749d180a104f7|273;jdv/0|kong|t_1001719029_|jingfen|9829338e25244b33b0e37f72e16bdb8c|1610965482434|1610965483;adk/;app_device/IOS;pap/JA2015_311210|9.3.5|IOS 14.3;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"
+                "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.2.2;14.2;%E4%BA%AC%E4%B8%9C/9.2.2 CFNetwork/1206 Darwin/20.1.0")
             }
         }
         $.post(options, (err, resp, data) => {

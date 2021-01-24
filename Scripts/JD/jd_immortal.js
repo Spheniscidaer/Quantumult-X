@@ -84,6 +84,7 @@ const inviteCodes = [];
     .finally(() => {
         $.done();
     })
+
 async function jdNian() {
     try {
         $.risk = false
@@ -99,6 +100,7 @@ async function jdNian() {
         $.logErr(e)
     }
 }
+
 function showMsg() {
     return new Promise(resolve => {
         message += `本次运行获得${$.earn}金币，当前${$.coin}金币`
@@ -110,6 +112,7 @@ function showMsg() {
         resolve()
     })
 }
+
 async function helpFriends() {
     for (let code of $.newShareCodes) {
         if (!code) continue
@@ -117,6 +120,7 @@ async function helpFriends() {
         await $.wait(2000)
     }
 }
+
 function doTask(itemToken) {
     return new Promise((resolve) => {
         $.post(taskPostUrl('mcxhd_brandcity_doTask', { itemToken: itemToken }, 'mcxhd_brandcity_doTask'), async (err, resp, data) => {
@@ -134,8 +138,7 @@ function doTask(itemToken) {
                         else {
                             console.log(`任务请求结果未知`)
                         }
-                    }
-                    else {
+                    } else {
                         console.log(data.retMessage)
                     }
                 }
@@ -147,6 +150,7 @@ function doTask(itemToken) {
         })
     })
 }
+
 function doTask2(taskToken) {
     let body = {
         "dataSource": "newshortAward",
@@ -164,8 +168,7 @@ function doTask2(taskToken) {
                         data = JSON.parse(data);
                         if (data.code === "0") {
                             console.log(data.toast.subTitle)
-                        }
-                        else {
+                        } else {
                             console.log(`任务完成失败，错误信息：${JSON.stringify(data)}`)
                         }
                     }
@@ -178,6 +181,7 @@ function doTask2(taskToken) {
         })
     })
 }
+
 function getHomeData(info = false) {
     return new Promise((resolve) => {
         $.post(taskPostUrl('mcxhd_brandcity_homePage'), async (err, resp, data) => {
@@ -195,8 +199,7 @@ function getHomeData(info = false) {
                             console.log(`当前用户金币${userCoinNum}`)
                         }
                         $.coin = userCoinNum
-                    }
-                    else {
+                    } else {
                         $.risk = true
                         console.log(`账号被风控，无法参与活动`)
                         message += `账号被风控，无法参与活动\n`
@@ -226,7 +229,7 @@ function getTaskList(body = {}) {
                         if (data.retCode === '200') {
                             $.tasks = data.result.tasks
                             for (let vo of $.tasks) {
-                                if (vo.taskType === "1" || vo.taskType === "2" || vo.taskType === "5" || vo.taskType === "3") {
+                                if (vo.taskType === "13" || vo.taskType === "2" || vo.taskType === "5" || vo.taskType === "3") {
                                     // 签到，逛一逛
                                     for (let i = vo.times, j = 0; i < vo.maxTimes && j < vo.subItem.length; ++i, ++j) {
                                         console.log(`去做${vo.taskName}任务，${i + 1}/${vo.maxTimes}`)
@@ -268,7 +271,10 @@ function getTaskList(body = {}) {
 function readShareCode() {
     console.log(`开始`)
     return new Promise(async resolve => {
-        $.get({ url: `http://jd.turinglabs.net/api/v2/jd/immortal/read/${randomCount}/`, 'timeout': 10000 }, (err, resp, data) => {
+        $.get({
+            url: `http://jd.turinglabs.net/api/v2/jd/immortal/read/${randomCount}/`,
+            'timeout': 10000
+        }, (err, resp, data) => {
             try {
                 if (err) {
                     console.log(`${JSON.stringify(err)}`)
@@ -289,6 +295,7 @@ function readShareCode() {
         resolve()
     })
 }
+
 //格式化助力码
 function shareCodesFormat() {
     return new Promise(async resolve => {
@@ -309,6 +316,7 @@ function shareCodesFormat() {
         resolve();
     })
 }
+
 function requireConfig() {
     return new Promise(async resolve => {
         console.log(`开始获取${$.name}配置文件\n`);
@@ -390,6 +398,7 @@ function taskPostUrl(function_id, body = {}, function_id2) {
         }
     }
 }
+
 function taskPostUrl2(function_id, body = {}, function_id2) {
     let url = `${JD_API_HOST}`;
     if (function_id2) {
@@ -407,6 +416,7 @@ function taskPostUrl2(function_id, body = {}, function_id2) {
         }
     }
 }
+
 function TotalBean() {
     return new Promise(async resolve => {
         const options = {
@@ -447,6 +457,7 @@ function TotalBean() {
         })
     })
 }
+
 function safeGet(data) {
     try {
         if (typeof JSON.parse(data) == "object") {
@@ -458,6 +469,7 @@ function safeGet(data) {
         return false;
     }
 }
+
 function jsonParse(str) {
     if (typeof str == "string") {
         try {

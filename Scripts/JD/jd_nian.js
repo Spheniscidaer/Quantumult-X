@@ -2,24 +2,24 @@
 京东炸年兽🧨
 活动时间:2021-1-18至2021-2-11
 暂不加入品牌会员
-活动入口:https://wbbny.m.jd.com/babelDiy/Zeus/2cKMj86srRdhgWcKonfExzK4ZMBy/index.html
-活动地址：京东app左侧浮动窗口
+地址 https://wbbny.m.jd.com/babelDiy/Zeus/2cKMj86srRdhgWcKonfExzK4ZMBy/index.html
+活动入口：京东app首页浮动窗口
 已支持IOS双京东账号,Node.js支持N个京东账号
 脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
 ============Quantumultx===============
 [task_local]
 #京东炸年兽🧨
-10 * * * * https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_nian.js, tag=京东炸年兽🧨, img-url=https://raw.githubusercontent.com/yogayyy/Scripts/main/Icon/lxk0301/jd_nian.png, enabled=true
+0 9,12,20,21 * * * https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_nian.js, tag=京东炸年兽🧨, img-url=https://raw.githubusercontent.com/yogayyy/Scripts/main/Icon/lxk0301/jd_nian.png, enabled=true
 
 ================Loon==============
 [Script]
-cron "10 * * * *" script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_nian.js,tag=京东炸年兽🧨
+cron "0 9,12,20,21 * * *" script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_nian.js,tag=京东炸年兽🧨
 
 ===============Surge=================
-京东炸年兽🧨 = type=cron,cronexp="10 * * * *",wake-system=1,timeout=3600,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_nian.js
+京东炸年兽🧨 = type=cron,cronexp="0 9,12,20,21 * * *",wake-system=1,timeout=3600,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_nian.js
 
 ============小火箭=========
-京东炸年兽🧨 = type=cron,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_nian.js, cronexpr="10 * * * *", timeout=3600, enable=true
+京东炸年兽🧨 = type=cron,script-path=https://raw.githubusercontent.com/LXK9301/jd_scripts/master/jd_nian.js, cronexpr="0 9,12,20,21 * * *", timeout=3600, enable=true
  */
 const $ = new Env('京东炸年兽🧨');
 
@@ -50,8 +50,8 @@ const inviteCodes = [
     `cgxZdTXtI-6L4wfLDFGg7Vg_B5amrJ5IPmaYnRTyS4W5wIjFcMS6gUcObb8`
 ];
 const pkInviteCodes = [
-    'IgNWdiLGaPadvlqJQnnKp27-YpAvKvSYNTSkTGvZylf_0wcvqD9EMkohEd8@IgNWdiLGaPaZskfACQyhgLSpZWps-WtQEW3McifV@IgNWdiLGaPaAvmHPAQf769XqjJjMyRirPzN9-AS-WHY9Y_G7t9Cwe5gdiI2qEvHZ',
-    'IgNWdiLGaPadvlqJQnnKp27-YpAvKvSYNTSkTGvZylf_0wcvqD9EMkohEd8@IgNWdiLGaPaZskfACQyhgLSpZWps-WtQEW3McifV@IgNWdiLGaPaAvmHPAQf769XqjJjMyRirPzN9-AS-WHY9Y_G7t9Cwe5gdiI2qEvHZ'
+    'IgNWdiLGaPadvlqJQnnKp27-YpAvKvSYNTSkTGvZylf_0wcvqD9EMkohEdI@IgNWdiLGaPaZskfACQyhgLSpZWps-WtQEW3McifY@IgNWdiLGaPaAvmHPAQf769XqjJjMyRirPzN9-AS-WHY9Y_G7t9Cwe5gdiI2qEvHU@IgNWdiLGaPYCeJUfsq18UNi5ln9xEZSPRdOue8Wl3hJTS2SQzU0vulL0fHeULJaIfgqHFd7f_KY@IgNWdiLGaPYCeJUfsq18UNi5ln9xEZSPRdOue8Wl3hLRjZBAJLHzBpcl18AeskNYctp-_w',
+    'IgNWdiLGaPadvlqJQnnKp27-YpAvKvSYNTSkTGvZylf_0wcvqD9EMkohEdI@IgNWdiLGaPaZskfACQyhgLSpZWps-WtQEW3McifY@IgNWdiLGaPaAvmHPAQf769XqjJjMyRirPzN9-AS-WHY9Y_G7t9Cwe5gdiI2qEvHU@IgNWdiLGaPYCeJUfsq18UNi5ln9xEZSPRdOue8Wl3hJTS2SQzU0vulL0fHeULJaIfgqHFd7f_KY@IgNWdiLGaPYCeJUfsq18UNi5ln9xEZSPRdOue8Wl3hLRjZBAJLHzBpcl18AeskNYctp-_w'
 ]
 !(async () => {
     await requireConfig();
@@ -78,7 +78,7 @@ const pkInviteCodes = [
                 continue
             }
             await shareCodesFormat();
-            // await shareCodesFormatPk()
+            await shareCodesFormatPk()
             await jdNian()
         }
     }
@@ -89,17 +89,25 @@ const pkInviteCodes = [
     .finally(() => {
         $.done();
     })
+
 async function jdNian() {
     try {
         await getHomeData()
         if (!$.secretp) return
         let hour = new Date().getUTCHours()
-        if (1 <= hour && hour <= 14) {
-            // 北京时间9点-22点做pk任务
+        if (1 <= hour && hour < 12) {
+            // 北京时间9点-20点
             $.hasGroup = false
             await pkTaskDetail()
             if ($.hasGroup) await pkInfo()
-            // await helpFriendsPK()
+            await helpFriendsPK()
+        }
+        if (12 <= hour && hour < 14) {
+            // 北京时间20点-22点
+            $.hasGroup = false
+            await pkTaskStealDetail()
+            if ($.hasGroup) await pkInfo()
+            await helpFriendsPK()
         }
         await $.wait(2000)
         await killCouponList()
@@ -119,6 +127,7 @@ async function jdNian() {
         $.logErr(e)
     }
 }
+
 function encode(data, aa, extraData) {
     const temp = {
         "extraData": JSON.stringify(extraData),
@@ -127,9 +136,11 @@ function encode(data, aa, extraData) {
     }
     return { "ss": (JSON.stringify(temp)) };
 }
+
 function getRnd() {
     return Math.floor(1e6 * Math.random()).toString();
 }
+
 function showMsg() {
     return new Promise(resolve => {
         console.log('任务已做完！\n如有未完成的任务，请多执行几次。注：目前入会任务不会做')
@@ -145,6 +156,7 @@ function showMsg() {
         resolve()
     })
 }
+
 async function helpFriends() {
     for (let code of $.newShareCodes) {
         if (!code) continue
@@ -152,6 +164,7 @@ async function helpFriends() {
         await $.wait(1000)
     }
 }
+
 async function helpFriendsPK() {
     for (let code of $.newShareCodesPk) {
         if (!code) continue
@@ -160,6 +173,7 @@ async function helpFriendsPK() {
         await $.wait(1000)
     }
 }
+
 async function doTask() {
     for (let item of $.taskVos) {
         if (item.taskType === 14) {
@@ -173,8 +187,7 @@ async function doTask() {
             } else if (item.status === 2) {
                 console.log(`${item.taskName}已做完`)
             }
-        }
-        else if (item.taskType === 3 || item.taskType === 26) {
+        } else if (item.taskType === 3 || item.taskType === 26) {
             if (item.shoppingActivityVos) {
                 if (item.status === 1) {
                     console.log(`准备做此任务：${item.taskName}`)
@@ -188,8 +201,7 @@ async function doTask() {
                     console.log(`${item.taskName}已做完`)
                 }
             }
-        }
-        else if (item.taskType === 9) {
+        } else if (item.taskType === 9) {
             if (item.status === 1) {
                 console.log(`准备做此任务：${item.taskName}`)
                 for (let task of item.shoppingActivityVos) {
@@ -201,8 +213,7 @@ async function doTask() {
             } else if (item.status === 2) {
                 console.log(`${item.taskName}已做完`)
             }
-        }
-        else if (item.taskType === 7) {
+        } else if (item.taskType === 7) {
             if (item.status === 1) {
                 console.log(`准备做此任务：${item.taskName}`)
                 for (let task of item.browseShopVo) {
@@ -281,6 +292,7 @@ function getFeedDetail(body = {}) {
         })
     })
 }
+
 function getHomeData(info = false) {
     return new Promise((resolve) => {
         $.post(taskPostUrl('nian_getHomeData'), async (err, resp, data) => {
@@ -314,8 +326,7 @@ function getHomeData(info = false) {
                             await $.wait(2000)
                             await raise()
                         }
-                    }
-                    else {
+                    } else {
                         $.secretp = null
                         console.log(`账号被风控，无法参与活动`)
                         message += `账号被风控，无法参与活动\n`
@@ -329,6 +340,7 @@ function getHomeData(info = false) {
         })
     })
 }
+
 function collectProduceScore(taskId = "collectProducedCoin") {
     let temp = {
         "taskId": taskId,
@@ -366,6 +378,7 @@ function collectProduceScore(taskId = "collectProducedCoin") {
         })
     })
 }
+
 function collectScore(taskId, itemId, actionType = null, inviteId = null, shopSign = null) {
     let temp = {
         "taskId": taskId,
@@ -414,8 +427,7 @@ function collectScore(taskId, itemId, actionType = null, inviteId = null, shopSi
                                     }
                                 }
                                 // $.userInfo = data.data.result.userInfo;
-                            }
-                            else {
+                            } else {
                                 console.log(data.data.bizMsg)
                             }
                         }
@@ -429,6 +441,7 @@ function collectScore(taskId, itemId, actionType = null, inviteId = null, shopSi
         })
     })
 }
+
 function pkCollectScore(taskId, itemId, actionType = null, inviteId = null, shopSign = null) {
     let temp = {
         "taskId": taskId,
@@ -477,8 +490,7 @@ function pkCollectScore(taskId, itemId, actionType = null, inviteId = null, shop
                                     }
                                 }
                                 // $.userInfo = data.data.result.userInfo;
-                            }
-                            else {
+                            } else {
                                 console.log(data.data.bizMsg)
                             }
                         }
@@ -492,6 +504,7 @@ function pkCollectScore(taskId, itemId, actionType = null, inviteId = null, shop
         })
     })
 }
+
 function doTask2(taskToken) {
     let body = {
         "dataSource": "newshortAward",
@@ -521,6 +534,7 @@ function doTask2(taskToken) {
         })
     })
 }
+
 function raise(taskId = "nian_raise") {
     let temp = {
         "taskId": taskId,
@@ -558,6 +572,7 @@ function raise(taskId = "nian_raise") {
         })
     })
 }
+
 function getTaskList(body = {}) {
     return new Promise(resolve => {
         $.post(taskPostUrl("nian_getTaskDetail", body, "nian_getTaskDetail"), async (err, resp, data) => {
@@ -585,6 +600,7 @@ function getTaskList(body = {}) {
         })
     })
 }
+
 function getFriendData(inviteId) {
     return new Promise((resolve) => {
         $.post(taskPostUrl('nian_getHomeData', { "inviteId": inviteId }), async (err, resp, data) => {
@@ -607,6 +623,7 @@ function getFriendData(inviteId) {
         })
     })
 }
+
 function map() {
     return new Promise(resolve => {
         $.post(taskPostUrl("nian_myMap", {}, "nian_myMap"), async (err, resp, data) => {
@@ -635,8 +652,15 @@ function map() {
         })
     })
 }
+
 function queryMaterials() {
-    let body = { "qryParam": "[{\"type\":\"advertGroup\",\"mapTo\":\"viewLogo\",\"id\":\"05149412\"},{\"type\":\"advertGroup\",\"mapTo\":\"bottomLogo\",\"id\":\"05149413\"}]", "activityId": "2cKMj86srRdhgWcKonfExzK4ZMBy", "pageId": "", "reqSrc": "", "applyKey": "21beast" }
+    let body = {
+        "qryParam": "[{\"type\":\"advertGroup\",\"mapTo\":\"viewLogo\",\"id\":\"05149412\"},{\"type\":\"advertGroup\",\"mapTo\":\"bottomLogo\",\"id\":\"05149413\"}]",
+        "activityId": "2cKMj86srRdhgWcKonfExzK4ZMBy",
+        "pageId": "",
+        "reqSrc": "",
+        "applyKey": "21beast"
+    }
     return new Promise(resolve => {
         $.post(taskPostUrl("qryCompositeMaterials", body, "qryCompositeMaterials"), async (err, resp, data) => {
             try {
@@ -686,8 +710,7 @@ function shopLotteryInfo(shopSign) {
                                         console.log(`去做${vo.taskName}任务`)
                                         await $.wait(2000)
                                         await collectScore(vo.taskId, vo.simpleRecordInfoVo.itemId, null, null, shopSign)
-                                    }
-                                    else if (vo.taskType === 3 || vo.taskType === 26) {
+                                    } else if (vo.taskType === 3 || vo.taskType === 26) {
                                         if (vo.shoppingActivityVos) {
                                             if (vo.status === 1) {
                                                 console.log(`准备做此任务：${vo.taskName}`)
@@ -720,6 +743,7 @@ function shopLotteryInfo(shopSign) {
         })
     })
 }
+
 function doShopLottery(shopSign) {
     let body = { "shopSign": shopSign }
     return new Promise(resolve => {
@@ -767,9 +791,19 @@ function pkInfo() {
                         if (data.code === 0 && data.data && data.data.bizCode === 0) {
                             console.log(`\n您的好友PK助力码为${data.data.result.groupInfo.groupAssistInviteId}\n`)
                             let info = data.data.result.groupPkInfo
-                            console.log(`当前关卡：${info.dayAward}元红包，完成进度 ${info.dayTotalValue}/${info.dayTargetSell}`)
-                        }
-                        else {
+                            if (info.dayAward)
+                                console.log(`白天关卡：${info.dayAward}元红包，完成进度 ${info.dayTotalValue}/${info.dayTargetSell}`)
+                            else {
+                                function secondToDate(result) {
+                                    var h = Math.floor(result / 3600);
+                                    var m = Math.floor((result / 60 % 60));
+                                    var s = Math.floor((result % 60));
+                                    return h + "小时" + m + "分钟" + s + "秒";
+                                }
+
+                                console.log(`守护关卡：${info.guardAward}元红包，剩余守护时间：${secondToDate(info.guardTime / 5)}`)
+                            }
+                        } else {
                             $.group = false
                             console.log(`获取组队信息失败，请检查`)
                         }
@@ -783,6 +817,42 @@ function pkInfo() {
         })
     })
 }
+
+function pkTaskStealDetail() {
+    return new Promise(resolve => {
+        $.post(taskPostUrl("nian_pk_getStealForms", {}, "nian_pk_getStealForms"), async (err, resp, data) => {
+            try {
+                if (err) {
+                    console.log(`${JSON.stringify(err)}`)
+                    console.log(`${$.name} API请求失败，请检查网路重试`)
+                } else {
+                    if (safeGet(data)) {
+                        data = JSON.parse(data);
+                        if (data.code === 0 && data.data && data.data.bizCode === 0) {
+                            $.hasGroup = true
+                            await $.wait(2000)
+                            for (let i = 1; i < data.data.result.stealGroups.length; ++i) {
+                                let item = data.data.result.stealGroups[i]
+                                if (item.stolen === 0) {
+                                    console.log(`去偷${item.name}的红包`)
+                                    await pkStealGroup(item.id)
+                                    await $.wait(2000)
+                                }
+                            }
+                        } else {
+                            console.log(`组队尚未开启，请先去开启组队或是加入队伍！`)
+                        }
+                    }
+                }
+            } catch (e) {
+                $.logErr(e, resp)
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
+
 function pkTaskDetail() {
     return new Promise(resolve => {
         $.post(taskPostUrl("nian_pk_getTaskDetail", {}, "nian_pk_getTaskDetail"), async (err, resp, data) => {
@@ -813,8 +883,7 @@ function pkTaskDetail() {
                                     }
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             console.log(`组队尚未开启，请先去开启组队或是加入队伍！`)
                         }
                     }
@@ -827,6 +896,7 @@ function pkTaskDetail() {
         })
     })
 }
+
 function pkAssignGroup(inviteId) {
     let temp = {
         "confirmFlag": 1,
@@ -853,8 +923,7 @@ function pkAssignGroup(inviteId) {
                         data = JSON.parse(data);
                         if (data.data && data.data.bizMsg) {
                             console.log(data.data.bizMsg)
-                        }
-                        else {
+                        } else {
                             console.log(`助力失败，未知错误:${JSON.stringify(data)}`)
                             $.canhelp = false
                         }
@@ -868,6 +937,46 @@ function pkAssignGroup(inviteId) {
         })
     })
 }
+
+function pkStealGroup(stealId) {
+    let temp = {
+        "stealId": stealId,
+    }
+    const extraData = {
+        "jj": 6,
+        "buttonid": "jmdd-react-smash_0",
+        "sceneid": "homePageh5",
+        "appid": '50073'
+    }
+    let body = {
+        ...encode(temp, $.secretp, extraData),
+        stealId: stealId
+    }
+    return new Promise(resolve => {
+        $.post(taskPostUrl("nian_pk_doSteal", body, "nian_pk_doSteal"), async (err, resp, data) => {
+            try {
+                if (err) {
+                    console.log(`${JSON.stringify(err)}`)
+                    console.log(`${$.name} API请求失败，请检查网路重试`)
+                } else {
+                    if (safeGet(data)) {
+                        data = JSON.parse(data);
+                        if (data.data && data.data.bizMsg) {
+                            console.log(data.data.bizMsg)
+                        } else {
+                            console.log(`偷取失败，未知错误:${JSON.stringify(data)}`)
+                        }
+                    }
+                }
+            } catch (e) {
+                $.logErr(e, resp)
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
+
 function killCouponList() {
     return new Promise(resolve => {
         $.post(taskPostUrl("nian_killCouponList", {}, "nian_killCouponList"), async (err, resp, data) => {
@@ -898,6 +1007,7 @@ function killCouponList() {
         })
     })
 }
+
 function killCoupon(skuId) {
     let temp = {
         "skuId": skuId,
@@ -937,10 +1047,14 @@ function killCoupon(skuId) {
         })
     })
 }
+
 function readShareCode() {
     console.log(`开始`)
     return new Promise(async resolve => {
-        $.get({ url: `https://code.chiang.fun/api/v1/jd/jdnian/read/${randomCount}/`, 'timeout': 10000 }, (err, resp, data) => {
+        $.get({
+            url: `https://code.chiang.fun/api/v1/jd/jdnian/read/${randomCount}/`,
+            'timeout': 10000
+        }, (err, resp, data) => {
             try {
                 if (err) {
                     console.log(`${JSON.stringify(err)}`)
@@ -961,10 +1075,14 @@ function readShareCode() {
         resolve()
     })
 }
+
 function readShareCodePk() {
     console.log(`开始`)
     return new Promise(async resolve => {
-        $.get({ url: `http://jd.turinglabs.net/api/v2/jd/nian_pk/read/${randomCount}/`, 'timeout': 10000 }, (err, resp, data) => {
+        $.get({
+            url: `http://jd.turinglabs.net/api/v2/jd/nian/read/${randomCount}/`,
+            'timeout': 10000
+        }, (err, resp, data) => {
             try {
                 if (err) {
                     console.log(`${JSON.stringify(err)}`)
@@ -985,6 +1103,7 @@ function readShareCodePk() {
         resolve()
     })
 }
+
 //格式化助力码
 function shareCodesFormat() {
     return new Promise(async resolve => {
@@ -1017,7 +1136,9 @@ function shareCodesFormatPk() {
             const tempIndex = $.index > pkInviteCodes.length ? (pkInviteCodes.length - 1) : ($.index - 1);
             $.newShareCodesPk = pkInviteCodes[tempIndex].split('@');
         }
-        const readShareCodeRes = await readShareCodePk();
+        let readShareCodeRes = null
+        if (new Date().getUTCHours() >= 12)
+            readShareCodeRes = await readShareCodePk();
         if (readShareCodeRes && readShareCodeRes.code === 200) {
             $.newShareCodesPk = [...new Set([...$.newShareCodesPk, ...(readShareCodeRes.data || [])])];
         }
@@ -1025,6 +1146,7 @@ function shareCodesFormatPk() {
         resolve();
     })
 }
+
 function requireConfig() {
     return new Promise(resolve => {
         console.log(`开始获取${$.name}配置文件\n`);
@@ -1085,6 +1207,7 @@ function taskPostUrl(function_id, body = {}, function_id2) {
         }
     }
 }
+
 function TotalBean() {
     return new Promise(async resolve => {
         const options = {
@@ -1125,6 +1248,7 @@ function TotalBean() {
         })
     })
 }
+
 function safeGet(data) {
     try {
         if (typeof JSON.parse(data) == "object") {
@@ -1136,6 +1260,7 @@ function safeGet(data) {
         return false;
     }
 }
+
 function jsonParse(str) {
     if (typeof str == "string") {
         try {

@@ -6,6 +6,7 @@
  */
 /*
 东东工厂，不是京喜工厂
+活动入口：京东APP首页-数码电器-东东工厂
 免费产生的电量(10秒1个电量，500个电量满，5000秒到上限不生产，算起来是84分钟达到上限)
 故建议1小时运行一次
 开会员任务和去京东首页点击“数码电器任务目前未做
@@ -42,6 +43,7 @@ if ($.isNode()) {
     cookiesArr.push(jdCookieNode[item])
   })
   if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => { };
+  if (process.env.JDFACTORY_FORBID_ACCOUNT) process.env.JDFACTORY_FORBID_ACCOUNT.split('&').map((item, index) => Number(item) === 0 ? cookiesArr = [] : cookiesArr.splice(Number(item) - 1 - index, 1))
 } else {
   let cookiesData = $.getdata('CookiesJD') || "[]";
   cookiesData = jsonParse(cookiesData);

@@ -3,7 +3,7 @@ crazyJoy任务
 
 每天运行一次即可
 
-
+活动入口：京东APP我的-更多工具-疯狂的JOY
 已支持IOS双京东账号,Node.js支持N个京东账号
 脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
 ============Quantumultx===============
@@ -172,10 +172,12 @@ if ($.isNode()) {
         return;
     }
     await requireConfig();
-    $.nextCode = ["EdLPh8A6X5G1iWXu-uPYfA==", "nCQQXQHKGjPCb7jkd8q2U-aCTjZMxL3s"];
-    $.nextCode = $.nextCode[randomNumber(0, $.nextCode.length)];
     $.selfCodes = []
     for (let i = 0; i < cookiesArr.length; i++) {
+        if (i % 2 === 0) {
+            $.nextCode = ["EdLPh8A6X5G1iWXu-uPYfA==", "nCQQXQHKGjPCb7jkd8q2U-aCTjZMxL3s"];
+            $.nextCode = $.nextCode[randomNumber(0, $.nextCode.length)];
+        }
         if (cookiesArr[i]) {
             cookie = cookiesArr[i];
             $.UserName = decodeURIComponent(cookie.match(/pt_pin=(.+?);/) && cookie.match(/pt_pin=(.+?);/)[1])

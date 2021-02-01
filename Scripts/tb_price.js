@@ -53,7 +53,7 @@ if (url.indexOf(path2) != -1) {
     let obj = JSON.parse(body)
     let item = obj.data.item
     let shareUrl = `https://item.taobao.com/item.htm?id=${item.itemId}`
-    requestPrice(shareUrl, function(data) {
+    requestPrice(shareUrl, function (data) {
         if (data) {
             if (obj.data.apiStack) {
                 let apiStack = obj.data.apiStack[0]
@@ -240,10 +240,7 @@ function sub(arg1, arg2) {
 
 function add(arg1, arg2) {
     arg1 = arg1.toString(), arg2 = arg2.toString();
-    var arg1Arr = arg1.split("."),
-        arg2Arr = arg2.split("."),
-        d1 = arg1Arr.length == 2 ? arg1Arr[1] : "",
-        d2 = arg2Arr.length == 2 ? arg2Arr[1] : "";
+    var arg1Arr = arg1.split("."), arg2Arr = arg2.split("."), d1 = arg1Arr.length == 2 ? arg1Arr[1] : "", d2 = arg2Arr.length == 2 ? arg2Arr[1] : "";
     var maxLen = Math.max(d1.length, d2.length);
     var m = Math.pow(10, maxLen);
     var result = Number(((arg1 * m + arg2 * m) / m).toFixed(maxLen));
@@ -260,7 +257,7 @@ function requestPrice(share_url, callback) {
         },
         body: "methodName=getHistoryTrend&p_url=" + encodeURIComponent(share_url)
     }
-    $tool.post(options, function(error, response, data) {
+    $tool.post(options, function (error, response, data) {
         if (!error) {
             callback(JSON.parse(data));
             if (consoleLog) console.log("Data:\n" + data);
@@ -299,12 +296,14 @@ function customTradeConsumerProtection() {
     return {
         "tradeConsumerService": {
             "service": {
-                "items": [],
+                "items": [
+                ],
                 "icon": "",
                 "title": "基础服务"
             },
             "nonService": {
-                "items": [],
+                "items": [
+                ],
                 "title": "其他"
             }
         },
@@ -318,7 +317,7 @@ function Qs2Json(url) {
     var search = url.substring(url.lastIndexOf("?") + 1);
     var obj = {};
     var reg = /([^?&=]+)=([^?&=]*)/g;
-    search.replace(reg, function(rs, $1, $2) {
+    search.replace(reg, function (rs, $1, $2) {
         var name = decodeURIComponent($1);
         var val = decodeURIComponent($2);
         val = String(val);
@@ -336,11 +335,11 @@ function Json2Qs(json) {
     return temp.join("&");
 }
 
-Array.prototype.insert = function(index, item) {
+Array.prototype.insert = function (index, item) {
     this.splice(index, 0, item);
 };
 
-Date.prototype.format = function(fmt) {
+Date.prototype.format = function (fmt) {
     var o = {
         "y+": this.getFullYear(),
         "M+": this.getMonth() + 1,
@@ -355,11 +354,13 @@ Date.prototype.format = function(fmt) {
         if (new RegExp("(" + k + ")").test(fmt)) {
             if (k == "y+") {
                 fmt = fmt.replace(RegExp.$1, ("" + o[k]).substr(4 - RegExp.$1.length));
-            } else if (k == "S+") {
+            }
+            else if (k == "S+") {
                 var lens = RegExp.$1.length;
                 lens = lens == 1 ? 3 : lens;
                 fmt = fmt.replace(RegExp.$1, ("00" + o[k]).substr(("" + o[k]).length - 1, lens));
-            } else {
+            }
+            else {
                 fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
             }
         }
@@ -428,78 +429,78 @@ function Base64() {
     // private property
     _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     // public method for encoding
-    this.encode = function(input) {
-            var output = "";
-            var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-            var i = 0;
-            input = _utf8_encode(input);
-            while (i < input.length) {
-                chr1 = input.charCodeAt(i++);
-                chr2 = input.charCodeAt(i++);
-                chr3 = input.charCodeAt(i++);
-                enc1 = chr1 >> 2;
-                enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-                enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-                enc4 = chr3 & 63;
-                if (isNaN(chr2)) {
-                    enc3 = enc4 = 64;
-                } else if (isNaN(chr3)) {
-                    enc4 = 64;
-                }
-                output = output +
-                    _keyStr.charAt(enc1) + _keyStr.charAt(enc2) +
-                    _keyStr.charAt(enc3) + _keyStr.charAt(enc4);
+    this.encode = function (input) {
+        var output = "";
+        var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+        var i = 0;
+        input = _utf8_encode(input);
+        while (i < input.length) {
+            chr1 = input.charCodeAt(i++);
+            chr2 = input.charCodeAt(i++);
+            chr3 = input.charCodeAt(i++);
+            enc1 = chr1 >> 2;
+            enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+            enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+            enc4 = chr3 & 63;
+            if (isNaN(chr2)) {
+                enc3 = enc4 = 64;
+            } else if (isNaN(chr3)) {
+                enc4 = 64;
             }
-            return output;
+            output = output +
+                _keyStr.charAt(enc1) + _keyStr.charAt(enc2) +
+                _keyStr.charAt(enc3) + _keyStr.charAt(enc4);
         }
-        // public method for decoding
-    this.decode = function(input) {
-            var output = "";
-            var chr1, chr2, chr3;
-            var enc1, enc2, enc3, enc4;
-            var i = 0;
-            input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-            while (i < input.length) {
-                enc1 = _keyStr.indexOf(input.charAt(i++));
-                enc2 = _keyStr.indexOf(input.charAt(i++));
-                enc3 = _keyStr.indexOf(input.charAt(i++));
-                enc4 = _keyStr.indexOf(input.charAt(i++));
-                chr1 = (enc1 << 2) | (enc2 >> 4);
-                chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-                chr3 = ((enc3 & 3) << 6) | enc4;
-                output = output + String.fromCharCode(chr1);
-                if (enc3 != 64) {
-                    output = output + String.fromCharCode(chr2);
-                }
-                if (enc4 != 64) {
-                    output = output + String.fromCharCode(chr3);
-                }
+        return output;
+    }
+    // public method for decoding
+    this.decode = function (input) {
+        var output = "";
+        var chr1, chr2, chr3;
+        var enc1, enc2, enc3, enc4;
+        var i = 0;
+        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+        while (i < input.length) {
+            enc1 = _keyStr.indexOf(input.charAt(i++));
+            enc2 = _keyStr.indexOf(input.charAt(i++));
+            enc3 = _keyStr.indexOf(input.charAt(i++));
+            enc4 = _keyStr.indexOf(input.charAt(i++));
+            chr1 = (enc1 << 2) | (enc2 >> 4);
+            chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+            chr3 = ((enc3 & 3) << 6) | enc4;
+            output = output + String.fromCharCode(chr1);
+            if (enc3 != 64) {
+                output = output + String.fromCharCode(chr2);
             }
-            output = _utf8_decode(output);
-            return output;
+            if (enc4 != 64) {
+                output = output + String.fromCharCode(chr3);
+            }
         }
-        // private method for UTF-8 encoding
-    _utf8_encode = function(string) {
-            string = string.replace(/\r\n/g, "\n");
-            var utftext = "";
-            for (var n = 0; n < string.length; n++) {
-                var c = string.charCodeAt(n);
-                if (c < 128) {
-                    utftext += String.fromCharCode(c);
-                } else if ((c > 127) && (c < 2048)) {
-                    utftext += String.fromCharCode((c >> 6) | 192);
-                    utftext += String.fromCharCode((c & 63) | 128);
-                } else {
-                    utftext += String.fromCharCode((c >> 12) | 224);
-                    utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-                    utftext += String.fromCharCode((c & 63) | 128);
-                }
+        output = _utf8_decode(output);
+        return output;
+    }
+    // private method for UTF-8 encoding
+    _utf8_encode = function (string) {
+        string = string.replace(/\r\n/g, "\n");
+        var utftext = "";
+        for (var n = 0; n < string.length; n++) {
+            var c = string.charCodeAt(n);
+            if (c < 128) {
+                utftext += String.fromCharCode(c);
+            } else if ((c > 127) && (c < 2048)) {
+                utftext += String.fromCharCode((c >> 6) | 192);
+                utftext += String.fromCharCode((c & 63) | 128);
+            } else {
+                utftext += String.fromCharCode((c >> 12) | 224);
+                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
 
-            }
-            return utftext;
         }
-        // private method for UTF-8 decoding
-    _utf8_decode = function(utftext) {
+        return utftext;
+    }
+    // private method for UTF-8 decoding
+    _utf8_decode = function (utftext) {
         var string = "";
         var i = 0;
         var c = c1 = c2 = 0;

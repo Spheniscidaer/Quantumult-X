@@ -746,7 +746,7 @@ function jsonParse(str) {
         }
     }
 }
-function updateShareCodes(url = 'https://gitee.com/lxk0301/updateTeam/raw/master/jd_818.json') {
+function updateShareCodes(url = 'https://gitee.com/lxk0301/updateTeam/raw/master/shareCodes/jd_818.json') {
     return new Promise(resolve => {
         $.get({
             url,

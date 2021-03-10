@@ -1,5 +1,0 @@
-# 滴滴出行
-
-^https:\/\/as\.xiaojukeji\.com\/ep\/as\/toggles\? url script-request-header ./didichuxing/didi_checkin.js
-
-hostname = as.xiaojukeji.com

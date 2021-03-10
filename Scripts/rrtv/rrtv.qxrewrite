@@ -1,4 +1,0 @@
-# 人人视频
-^https:\/\/api\.rr\.tv\/user\/profile url script-request-header ./rrtv/rrtv.cookie.js
-
-hostname = *.rr.tv

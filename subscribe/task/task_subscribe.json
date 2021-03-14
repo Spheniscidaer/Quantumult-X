@@ -6,10 +6,6 @@
             "addons": "https://public.nameidi.top:7443/Quantumult-X/subscribe/rewrite/jd_rewrite_subscribe.conf"
         },
         {
-            "config": "0 0,9 * * * https://public.nameidi.top:7443/Quantumult-X/script/JD/jd_baiTiao.js, tag=京东白条, img-url=https://raw.githubusercontent.com/yangtingxiao/QuantumultX/master/image/baitiao.png, enabled=true",
-            "addons": "https://public.nameidi.top:7443/Quantumult-X/subscribe/rewrite/jd_rewrite_subscribe.conf"
-        },
-        {
             "config": "2 9 * * * https://public.nameidi.top:7443/Quantumult-X/script/JD/jd_bean_change.js, tag=京豆变动通知, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=true",
             "addons": "https://public.nameidi.top:7443/Quantumult-X/subscribe/rewrite/jd_rewrite_subscribe.conf"
         },

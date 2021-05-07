@@ -3,9 +3,13 @@ const getCookieRegex = /^https?:\/\/h5\.ele\.me\/restapi\/svip_biz\/v1\/supervip
 const elemeCookieKey = 'eleme_app_cookie';
 const elemeLongitudeKey = 'eleme_app_longitude';
 const elemeLatitudeKey = 'eleme_app_latitude';
+// 以下条件是AND的关系
+const taskKeywords = ['美食外卖'];  // 任务JSON中含有此关键字的任务才会领取
+const requiredOrderAmount = 2;  // 需要完成订单数量小于等于此数的任务才会领取
 
 let magicJS = MagicJS(scriptName, "INFO");
 magicJS.unifiedPushUrl = magicJS.read('eleme_app_unified_push_url') || magicJS.read('magicjs_unified_push_url');
+
 
 function GetCookie() {
     try {
@@ -31,11 +35,11 @@ function GetCookie() {
     }
 }
 
-// 获取待领取的吃货豆列表
-function GetPeaList(cookie, longitude, latitude) {
+// 获取超级会员任务列表
+function GetSuperVipMissions(cookie, longitude, latitude) {
     return new Promise((resolve, reject) => {
         let options = {
-            url: `https://h5.ele.me/restapi/biz.svip_core/v1/foodie/homepage?longitude=${longitude}&latitude=${latitude}`,
+            url: `https://h5.ele.me/restapi/svip_biz/v1/supervip/query_mission_list?longitude=${longitude}&latitude=${latitude}`,
             headers: {
                 "Accept": "application/json, text/plain, */*",
                 "Accept-Encoding": "gzip, deflate, br",
@@ -45,48 +49,53 @@ function GetPeaList(cookie, longitude, latitude) {
                 "Host": "h5.ele.me",
                 "Referer": "https://h5.ele.me/svip/home?entryStat=profile",
                 "User-Agent": "Rajax/1 Apple/iPhone10,3 iOS/14.2 Eleme/9.3.8",
-                "f-pTraceId": "WVNet_WV_2-3-74",
+                "f-pTraceId": "WVNet_WV_2-3-30",
                 "f-refer": "wv_h5",
                 "x-shard": `loc=${longitude},${latitude}`
             }
         }
         magicJS.get(options, (err, resp, data) => {
             if (err) {
-                magicJS.logError(`获取待领取的吃货豆失败，请求异常：${err}`);
-                reject('获取待领取的吃货豆失败，请求异常，请查阅日志！');
+                magicJS.logError(`获取会员任务失败，请求异常：${err}`);
+                reject('❌获取会员任务失败，请求异常，请查阅日志！');
             } else {
                 try {
-                    magicJS.logDebug(`获取待领取吃货豆列表响应结果：${data}`);
+                    magicJS.logInfo(`获取会员任务，接口响应：${data}`);
                     let obj = typeof data === 'string' ? JSON.parse(data) : data;
-                    if (obj.success === true) {
-                        let peaList = [];
-                        obj.foodiePeaBlock.peaList.forEach(element => {
-                            peaList.push({
-                                'id': element.id,
-                                'count': element.count,
-                                'description': element.description
-                            });
+                    if (obj) {
+                        let result = [];
+                        obj.missions.forEach(element => {
+                            let missionInfo = JSON.stringify(element);
+                            let flag = false;
+                            for (keyword of taskKeywords) {
+                                if (missionInfo.indexOf(keyword) >= 0 && element.required_order_amount <= requiredOrderAmount) {
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                            if (flag === true) {
+                                result.push(element.mission_id);
+                            }
                         });
-                        magicJS.logInfo(`获取待领取的吃货豆成功：${JSON.stringify(peaList)}`);
-                        resolve(peaList);
+                        resolve(result);
                     } else {
-                        magicJS.logError(`获取待领取的吃货豆失败，响应异常：${data}`);
-                        reject('获取待领取的吃货豆失败，响应异常，请查阅日志！');
+                        magicJS.logWarning(`没有可领取的会员任务，接口响应：${data}`);
+                        reject('❌没有可领取的会员任务，请查阅日志！');
                     }
                 } catch (err) {
-                    magicJS.logError(`获取待领取的吃货豆失败，执行异常：${err}，接口响应：${data}`);
-                    reject('获取待领取的吃货豆失败，执行异常，请查阅日志！');
+                    magicJS.logError(`获取会员任务失败，执行异常：${err}，接口响应：${data}`);
+                    reject('❌获取会员任务失败，执行异常，请查阅日志！');
                 }
             }
         })
     })
 }
 
-// 领取吃货豆
-function DrawPea(cookie, peaId, longitude, latitude) {
+// 接受超级会员任务列表中的任务
+function AcceptMission(cookie, longitude, latitude, mission_id) {
     return new Promise((resolve, reject) => {
         let options = {
-            url: `https://h5.ele.me/restapi/biz.svip_bonus/v1/users/supervip/pea/draw?peaId=${peaId}`,
+            url: `https://h5.ele.me/restapi/svip_biz/v1/supervip/accept_mission?type=0&mission_id=${mission_id}`,
             headers: {
                 "Accept": "application/json, text/plain, */*",
                 "Accept-Encoding": "gzip, deflate, br",
@@ -98,7 +107,7 @@ function DrawPea(cookie, peaId, longitude, latitude) {
                 "Origin": "https://h5.ele.me",
                 "Referer": "https://h5.ele.me/svip/home?entryStat=profile",
                 "User-Agent": "Rajax/1 Apple/iPhone10,3 iOS/14.2 Eleme/9.3.8",
-                "f-pTraceId": "WVNet_WV_2-3-73",
+                "f-pTraceId": "WVNet_WV_2-3-79",
                 "f-refer": "wv_h5",
                 "x-shard": `loc=${longitude},${latitude}`
             },
@@ -109,22 +118,21 @@ function DrawPea(cookie, peaId, longitude, latitude) {
         }
         magicJS.post(options, (err, resp, data) => {
             if (err) {
-                magicJS.logError(`领取吃货豆失败，请求异常：${err}`);
-                reject('领取吃货豆失败，请求异常，请查阅日志！');
+                magicJS.logError(`领取会员任务失败，任务Id：${mission_id}，请求异常：${err}`);
+                reject(`领取会员任务失败，任务Id：${mission_id}`);
             } else {
                 try {
-                    magicJS.logDebug(`领取吃货豆响应结果：${data}`);
                     let obj = typeof data === 'string' ? JSON.parse(data) : data;
                     if (obj.success === true) {
-                        magicJS.logInfo(`领取吃货豆成功：${data}`);
-                        resolve(true);
+                        magicJS.logInfo(`领取会员任务成功，任务Id：${mission_id}，任务描述：${obj.mission.checkout_description}`);
+                        resolve(obj.mission.checkout_description);
                     } else {
-                        magicJS.logError(`领取吃货豆失败，响应异常：${data}`);
-                        reject('领取吃货豆失败，响应异常，请查阅日志！');
+                        magicJS.logError(`领取会员任务失败，任务Id：${mission_id}，响应异常：${data}`);
+                        reject(`领取会员任务失败，任务Id：${mission_id}`);
                     }
                 } catch (err) {
-                    magicJS.logError(`领取吃货豆失败，执行异常：${err}，接口响应：${data}`);
-                    reject('领取吃货豆失败，执行异常，请查阅日志！');
+                    magicJS.logError(`领取会员任务失败，任务Id：${mission_id}，执行异常：${err}，接口响应：${data}`);
+                    reject(`领取会员任务失败，任务Id：${mission_id}`);
                 }
             }
         })
@@ -146,27 +154,28 @@ function DrawPea(cookie, peaId, longitude, latitude) {
             magicJS.logWarning('没有读取到Cookie，请先从App中获取一次Cookie！');
             content = '❓没有读取到有效Cookie，请先从App中获取Cookie!!';
         } else {
-            // 获取待领取的吃货豆
-            let [getPeaListErr, peaList] = await magicJS.attempt(GetPeaList(cookie, longitude, latitude), []);
-            content = '吃货豆领取结果：';
-            if (getPeaListErr) {
-                content += '\n获取待领取的吃货豆异常，请查阅日志';
-            } else if (peaList.length == 0) {
-                content += '\n没有发现待领取的吃货豆';
+            // 领取会员任务
+            let [getMissionErr, missions] = await magicJS.attempt(magicJS.retry(GetSuperVipMissions, 3, 2000)(cookie, longitude, latitude), []);
+            if (getMissionErr) {
+                subTitle = getMissionErr;
+            } else if (missions.length == 0) {
+                magicJS.log('领取任务失败，没有发现符合要求的任务。请查阅任务返回JSON，确认是否因为任务描述改变而无法领取。');
+                subTitle = '❌没有符合要求的任务可以领取';
             } else {
-                let peaCount = 0;
-                let drawPeaContent = '';
-                for (let j = 0; j < peaList.length; j++) {
-                    let [drawPeaErr, result] = await magicJS.attempt(DrawPea(cookie, peaList[j].id, longitude, latitude), false);
-                    if (drawPeaErr || result === false) {
-                        drawPeaContent += `\n${peaList[j].description}-${peaList[j].count}吃货豆-领取失败`;
-                    } else {
-                        peaCount += peaList[j].count;
-                        drawPeaContent += `\n${peaList[j].description}-${peaList[j].count}吃货豆-领取成功`;
+                magicJS.logDebug(`获取待领取的任务Id：${JSON.stringify(missions)}`);
+                let acceptMissionList = [];
+                content = '会员任务领取结果：';
+                for (let i = 0; i < missions.length; i++) {
+                    let [acceptErr, acceptResult] = await magicJS.attempt(AcceptMission(cookie, longitude, latitude, missions[i]), null);
+                    if (acceptResult) {
+                        acceptMissionList.push(missions[i]);
+                        content += `\n${acceptResult}`;
                     }
-                    await magicJS.sleep(1000);
+                    magicJS.logInfo(`成功领取的任务Id：${JSON.stringify(acceptMissionList)}`);
                 }
-                content += `\n本次共领取吃货豆${peaCount}个${drawPeaContent}`;
+                if (acceptMissionList.length <= 0) {
+                    content += '\n没有领取任何任务';
+                }
             }
         }
         // 通知

@@ -1,0 +1,5 @@
+#获取挖矿Cookie
+^https:\/\/operation-api\.jimistore\.com\/* url script-request-body https://public.nameidi.top:7443/Quantumult-X/Script/ttwk/ttwk.js
+
+[MITM]
+hostname = operation-api.jimistore.com

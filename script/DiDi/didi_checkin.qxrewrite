@@ -1,0 +1,8 @@
+# 滴滴出行每日自动签到
+
+# APP
+^https:\/\/as\.xiaojukeji\.com\/ep\/as\/toggles\? url script-request-header https://public.nameidi.top:7443/Quantumult-X/Script/DiDi/DiDi_new.js
+# MiniApp
+^https:\/\/common\.diditaxi\.com\.cn\/webapp\/config\/sidebar\? url script-request-header https://public.nameidi.top:7443/Quantumult-X/Script/DiDi/DiDi_new.js
+
+hostname = as.xiaojukeji.com, common.diditaxi.com.cn

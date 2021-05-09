@@ -1,0 +1,6 @@
+https:\/\/api\.weibo\.cn\/\d\/page\/\w+\?gsid url script-request-header https://public.nameidi.top:7443/Quantumult-X/Script/weibo/weibo.js
+
+# 钱包签到Cookie
+https:\/\/pay\.sc\.weibo\.com\/aj\/mobile\/home\/welfare\/signin\/do\? url script-request-header https://public.nameidi.top:7443/Quantumult-X/Script/weibo/weibo.js
+
+hostname = api.weibo.cn, pay.sc.weibo.com

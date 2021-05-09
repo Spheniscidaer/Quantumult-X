@@ -1,0 +1,6 @@
+https:\/\/api\.m\.jd\.com\/client\.action.*functionId=signBean url script-request-header https://public.nameidi.top:7443/Quantumult-X/Script/jd/JD_DailyBonus.js
+
+# 历史价格
+^https?://api\.m\.jd\.com/client\.action\?functionId=(wareBusiness|serverConfig|basicConfig) url script-response-body https://public.nameidi.top:7443/Quantumult-X/Script/jd/jd_hisprice.js
+
+hostname = api.m.jd.com

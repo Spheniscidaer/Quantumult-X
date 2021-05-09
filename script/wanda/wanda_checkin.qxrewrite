@@ -1,0 +1,5 @@
+# 万达电影每日自动签到
+
+^https:\/\/user-api-prd-mx\.wandafilm\.com url script-request-header https://public.nameidi.top:7443/Quantumult-X/Script/wanda/wanda.cookie.js
+
+hostname = user-api-prd-mx.wandafilm.com

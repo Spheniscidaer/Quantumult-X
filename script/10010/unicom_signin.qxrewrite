@@ -1,0 +1,5 @@
+# 中国联通App每日签到与抽奖
+
+^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage url script-request-header https://public.nameidi.top:7443/Quantumult-X/Script/10010/unicom_signin.js
+
+hostname = m.client.10010.com

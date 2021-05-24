@@ -3,9 +3,7 @@
 增加京东APP首页超级摇一摇(不定时有活动)
 增加超级品牌日做任务及抽奖
 增加 京东小魔方 抽奖
-Modified from https://github.com/Zero-S1/JD_tools/blob/master/JD_vvipclub.py
 已支持IOS双京东账号,Node.js支持N个京东账号
-脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
 */
 
 const $ = new Env('摇京豆');
@@ -1038,12 +1036,12 @@ function superbrand_getGift() {
                 $.jpeasList = result['jpeasList'];
                 if ($.jpeasList && $.jpeasList.length) {
                   for (let item of $.jpeasList) {
-                    console.log(`超级品牌日 抽奖 获得：${item['quantity']}${item['prizeName']}`);
-                    message += `【超级品牌日】获得：${item['quantity']}${item['prizeName']}\n`;
+                    console.log(`超级品牌日 抽奖 获得：${item['quantity']}京豆🐶`);
+                    message += `【超级品牌日】获得：${item['quantity']}京豆🐶\n`;
                     if ($.superShakeBeanNum === 0) {
-                      allMessage += `京东账号${$.index}${$.nickName || $.UserName}\n【超级品牌日】获得：${item['quantity']}${item['prizeName']}\n`;
+                      allMessage += `京东账号${$.index}${$.nickName || $.UserName}\n【超级品牌日】获得：${item['quantity']}京豆🐶\n`;
                     } else {
-                      allMessage += `【超级品牌日】获得：${item['quantity']}${item['prizeName']}\n`;
+                      allMessage += `【超级品牌日】获得：${item['quantity']}京豆🐶\n`;
                     }
                   }
                 }

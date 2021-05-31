@@ -40,9 +40,7 @@ let nowTime = new Date().getTime() + new Date().getTimezoneOffset()*60*1000 + 8*
     $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
     return;
   }
-  $.temp = [
-    'd35dab5d-014b-4b8d-a910-d401157bb540'
-  ];
+  $.temp = ['d35dab5d-014b-4b8d-a910-d401157bb540'];
   if (nowTime > new Date(activeEndTime).getTime()) {
     //活动结束后弹窗提醒
     $.msg($.name, '活动已结束', `该活动累计获得京豆：${$.jingBeanNum}个\n请删除此脚本\n咱江湖再见`);

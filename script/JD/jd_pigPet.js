@@ -1,4 +1,5 @@
 /*
+Last Modified time: 2021-5-19 12:27:16
 活动入口：京东金融养猪猪
 一键开完所有的宝箱功能。耗时70秒
 大转盘抽奖
@@ -235,7 +236,9 @@ function pigPetLogin() {
                   return
                 }
                 if (data.resultData.resultData.wished) {
-                  allMessage += `京东账号${$.index} ${$.nickName || $.UserName}\n${data.resultData.resultData.wishAward.name}已可兑换${$.index !== cookiesArr.length ? '\n\n' : ''}`
+                  if (data.resultData.resultData.wishAward) {
+                    allMessage += `京东账号${$.index} ${$.nickName || $.UserName}\n${data.resultData.resultData.wishAward.name}已可兑换${$.index !== cookiesArr.length ? '\n\n' : ''}`
+                  }
                 }
               } else {
                 console.log(`Login其他情况：${JSON.stringify(data)}`)

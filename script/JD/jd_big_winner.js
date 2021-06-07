@@ -43,7 +43,7 @@ const len = cookiesArr.length;
   }
   if (message) {
     $.msg($.name, '', message);
-    if ($.isNode()) await notify.sendNotify($.name, message);
+    //if ($.isNode()) await notify.sendNotify($.name, message);
   }
 })()
     .catch((e) => {

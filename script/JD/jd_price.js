@@ -77,7 +77,6 @@ if ($.isNode()) {
         $.refundtotalamount = 0;
         $.orderList = new Array();
         $.applyMap = {};
-        // TODO
         $.token = '';
         $.feSt = 'f';
         console.log(`💥 获得首页面，解析超参数`);

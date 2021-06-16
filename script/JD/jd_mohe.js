@@ -22,7 +22,7 @@ if ($.isNode()) {
 
 const JD_API_HOST = 'https://isp5g.m.jd.com';
 //邀请码一天一变化，已确定
-$.shareId = ['fabfc87d-354a-354a-40af-adcc-cef5eba2e64a'];
+$.shareId = [];
 !(async () => {
   if (!cookiesArr[0]) {
     $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
@@ -32,7 +32,7 @@ $.shareId = ['fabfc87d-354a-354a-40af-adcc-cef5eba2e64a'];
       '活动地址: https://isp5g.m.jd.com\n' +
       '活动时间：2021-06-2到2021-07-31\n' +
       '更新时间：2021-06-3 12:00');
-  await updateShareCodesCDN()
+  await updateShareCodesCDN('https://raw.githubusercontent.com/JDHelloWorld/jd_scripts/main/tools/empty.json')
   for (let i = 0; i < cookiesArr.length; i++) {
     if (cookiesArr[i]) {
       cookie = cookiesArr[i];
@@ -488,7 +488,7 @@ function taskurl(url) {
     }
   }
 }
-function updateShareCodesCDN(url = 'https://cdn.jsdelivr.net/gh/gitupdate/updateTeam@master/shareCodes/jd_shareCodes.json') {
+function updateShareCodesCDN(url) {
   return new Promise(resolve => {
     $.get({
       url ,

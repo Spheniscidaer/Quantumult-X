@@ -5,7 +5,7 @@
 活动入口：京东APP首页-京东汽车-屏幕右中部，车主福利
 活动网页地址：https://h5.m.jd.com/babelDiy/Zeus/44bjzCpzH9GpspWeBzYSqBA7jEtP/index.html#/journey
 
-更新地址：https://gitee.com/lxk0301/jd_scripts/raw/master/jd_car_exchange
+更新地址：jd_car_exchange
 已支持IOS, Node.js支持N个京东账号
 脚本兼容: QuantumultX, Surge, Loon, 小火箭，JSBox, Node.js
 */

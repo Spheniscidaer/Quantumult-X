@@ -2,7 +2,7 @@
 京东快递签到
 活动入口：https://jingcai-h5.jd.com/#/
 签到领豆,14天内满4次和7次享额外奖励，每天运行一次即可
-更新地址：https://gitee.com/lxk0301/jd_scripts/raw/master/jd_kd.js
+更新地址：jd_kd.js
 
 已支持IOS双京东账号, Node.js支持N个京东账号
 脚本兼容: QuantumultX, Surge, Loon, 小火箭，JSBox, Node.js

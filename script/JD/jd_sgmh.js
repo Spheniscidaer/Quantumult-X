@@ -4,19 +4,19 @@
 修改自 @yangtingxiao 抽奖机脚本
 活动入口：京东APP首页-闪购-闪购盲盒
 网页地址：https://h5.m.jd.com/babelDiy/Zeus/3vzA7uGuWL2QeJ5UeecbbAVKXftQ/index.html
-更新地址：https://gitee.com/lxk0301/jd_scripts/raw/master/jd_sgmh.js
+更新地址：jd_sgmh.js
 已支持IOS双京东账号, Node.js支持N个京东账号
 脚本兼容: QuantumultX, Surge, Loon, 小火箭，JSBox, Node.js
 */
 const $ = new Env('闪购盲盒');
+
+console.log('\n====================Hello World====================\n')
+
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let appId = '1EFRXxg' , homeDataFunPrefix = 'interact_template', collectScoreFunPrefix = 'harmony', message = ''
 let lotteryResultFunPrefix = homeDataFunPrefix, browseTime = 6
-const inviteCodes = [
-  'T0225KkcR0pI_F3VJE79lqYIJwCjVQmoaT5kRrbA',
-  'T0225KkcR0pI_F3VJE79lqYIJwCjVWmIaW5kRrbA'
-];
+const inviteCodes = ['T0225KkcR0pI_F3VJE79lqYIJwCjVQmoaT5kRrbA'];
 const randomCount = $.isNode() ? 20 : 5;
 const notify = $.isNode() ? require('./sendNotify') : '';
 let merge = {}
@@ -297,7 +297,7 @@ function readShareCode() {
   console.log(`开始`)
   return new Promise(async resolve => {
     $.get({
-      url: `http://share.turinglabs.net/api/v3/sgmh/query/${randomCount}/`,
+      url: `http://api.sharecode.ga/api/sgmh/${randomCount}`,
       'timeout': 10000
     }, (err, resp, data) => {
       try {
